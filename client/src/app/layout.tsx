@@ -1,7 +1,11 @@
+import { useAppSelector } from '@/state/redux';
+import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import { DM_Sans } from 'next/font/google';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { Toaster } from 'sonner';
 import './globals.css';
+import Providers from './providers';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -19,13 +23,35 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
+
+  // Simplified and more reliable dark mode toggle logic
+  useEffect(() => {
+    const htmlElement = document.documentElement;
+
+    if (isDarkMode) {
+      htmlElement.classList.add('dark');
+      htmlElement.classList.remove('light');
+    } else {
+      htmlElement.classList.remove('dark');
+      htmlElement.classList.add('light');
+    }
+
+    // Clean up function is not needed since we're managing the state properly
+  }, [isDarkMode]);
+
   return (
-    <html lang='en' suppressHydrationWarning>
-      <body className={`${dmSans.className}`} suppressHydrationWarning>
-        <Suspense fallback={null}>
-          <div className='root-layout'>{children}</div>
-        </Suspense>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang='en' suppressHydrationWarning>
+        <body className={`${dmSans.className}`} suppressHydrationWarning>
+          <Providers>
+            <Suspense fallback={null}>
+              <div className='root-layout'>{children}</div>
+            </Suspense>
+            <Toaster richColors closeButton />
+          </Providers>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -1,9 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
   interface PaymentMethod {
     methodId: string;
     type: string;
     lastFour: string;
     expiry: string;
+  }
+
+  interface Window {
+    Clerk?: any;
   }
 
   interface UserSettings {
