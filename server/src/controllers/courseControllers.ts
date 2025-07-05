@@ -1,3 +1,4 @@
+import { getAuth } from '@clerk/express';
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import Course from '../models/courseModel';
@@ -73,6 +74,7 @@ export const updateCourse = async (
 ): Promise<void> => {
   const { courseId } = req.params;
   const updateData = { ...req.body };
+  const { userId } = getAuth(req);
 
   try {
     const course = await Course.get(courseId);
@@ -81,7 +83,7 @@ export const updateCourse = async (
       return;
     }
 
-    if (course.teacherId) {
+    if (course.teacherId !== userId) {
       res
         .status(403)
         .json({ message: 'Not authorized to update this course ' });
@@ -130,6 +132,7 @@ export const deleteCourse = async (
   res: Response
 ): Promise<void> => {
   const { courseId } = req.params;
+  const { userId } = getAuth(req);
 
   try {
     const course = await Course.get(courseId);
@@ -138,7 +141,7 @@ export const deleteCourse = async (
       return;
     }
 
-    if (course.teacherId) {
+    if (course.teacherId !== userId) {
       res
         .status(403)
         .json({ message: 'Not authorized to delete this course ' });

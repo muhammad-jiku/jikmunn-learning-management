@@ -1,3 +1,4 @@
+import { getAuth } from '@clerk/express';
 import { Request, Response } from 'express';
 import Course from '../models/courseModel';
 import UserCourseProgress from '../models/userCourseProgressModel';
@@ -8,8 +9,9 @@ export const getUserEnrolledCourses = async (
   res: Response
 ): Promise<void> => {
   const { userId } = req.params;
+  const auth = getAuth(req);
 
-  if (!userId) {
+  if (!auth || auth.userId !== userId) {
     res.status(403).json({ message: 'Access denied' });
     return;
   }
