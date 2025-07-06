@@ -5,6 +5,7 @@ import {
   createCourse,
   deleteCourse,
   getCourse,
+  getUploadVideoUrl,
   listCourses,
   updateCourse,
 } from '../controllers/courseControllers';
@@ -19,5 +20,9 @@ router
   .get(getCourse)
   .put(requireAuth(), upload.single('image'), updateCourse)
   .delete(requireAuth(), deleteCourse);
+
+router
+  .route('/:courseId/sections/:sectionId/chapters/:chapterId/get-upload-url')
+  .post(requireAuth(), getUploadVideoUrl);
 
 export default router;
