@@ -6,6 +6,7 @@
     "typescript-config/consistent-casing": "off",
     "axe/name-role-value": "off",
     "button-type": "off",
-    "typescript-config/is-valid": "off"
+    "typescript-config/is-valid": "off",
+    "no-inline-styles": "off"
   }
 }

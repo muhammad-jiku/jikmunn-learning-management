@@ -23,7 +23,7 @@ const SignUpComponent = () => {
     if (userType === 'teacher') {
       return '/teacher/courses';
     }
-    return '/user/courses';
+    return '/student/courses';
   };
 
   return (

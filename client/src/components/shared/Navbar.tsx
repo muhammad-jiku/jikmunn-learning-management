@@ -53,7 +53,7 @@ const Navbar = ({ isCoursePage }: { isCoursePage: boolean }) => {
             showName={true}
             userProfileMode='navigation'
             userProfileUrl={
-              userRole === 'teacher' ? '/teacher/profile' : '/user/profile'
+              userRole === 'teacher' ? '/teacher/profile' : '/student/profile'
             }
           />
         </div>
