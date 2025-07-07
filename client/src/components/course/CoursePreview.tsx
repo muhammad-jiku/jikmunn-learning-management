@@ -1,6 +1,6 @@
 import { formatPrice } from '@/lib/utils';
 import Image from 'next/image';
-import AccordionSections from '../AccordionSections';
+import AccordionSections from '../shared/AccordionSections';
 
 const CoursePreview = ({ course }: CoursePreviewProps) => {
   const price = formatPrice(course.price);

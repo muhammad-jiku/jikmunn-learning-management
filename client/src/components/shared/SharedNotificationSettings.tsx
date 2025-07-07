@@ -10,8 +10,8 @@ import { useUpdateUserMutation } from '@/state/api';
 import { useUser } from '@clerk/nextjs';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { CustomFormField } from '../custom/CustomFormField';
 import Header from './Header';
-import { CustomFormField } from './custom/CustomFormField';
 
 const SharedNotificationSettings = ({
   title = 'Notification Settings',
