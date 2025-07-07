@@ -9,7 +9,7 @@ import { courseCategories } from '@/lib/utils';
 import { useState } from 'react';
 
 const Toolbar = ({ onSearch, onCategoryChange }: ToolbarProps) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);

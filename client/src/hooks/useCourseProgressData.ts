@@ -10,7 +10,7 @@ import { useState } from 'react';
 export const useCourseProgressData = () => {
   const { courseId, chapterId } = useParams();
   const { user, isLoaded } = useUser();
-  const [hasMarkedComplete, setHasMarkedComplete] = useState(false);
+  const [hasMarkedComplete, setHasMarkedComplete] = useState<boolean>(false);
   const [updateProgress] = useUpdateUserCourseProgressMutation();
 
   const { data: course, isLoading: courseLoading } = useGetCourseQuery(

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import Loading from '@/components/shared/Loading';
@@ -21,13 +22,14 @@ const Course = () => {
     hasMarkedComplete,
     setHasMarkedComplete,
   } = useCourseProgressData();
-  console.log('currentChapter.video:', currentChapter);
 
-  const playerRef = useRef<ReactPlayer>(null);
+  const playerRef = useRef<any>(null);
 
-  const handleProgress = ({ played }: { played: number }) => {
+  const handleProgress: NonNullable<any['onProgress']> = (state: {
+    played: number;
+  }) => {
     if (
-      played >= 0.8 &&
+      state.played >= 0.8 &&
       !hasMarkedComplete &&
       currentChapter &&
       currentSection &&
@@ -41,6 +43,10 @@ const Course = () => {
         true
       );
     }
+  };
+
+  const fileConfig: any = {
+    file: { attributes: { controlsList: 'nodownload' } },
   };
 
   if (isLoading) return <Loading />;
@@ -78,18 +84,18 @@ const Course = () => {
             {currentChapter?.video ? (
               <ReactPlayer
                 ref={playerRef}
-                url={currentChapter.video as string}
+                src={currentChapter.video as string}
+                // url={currentChapter.video as string}
                 controls
                 width='100%'
                 height='100%'
                 onProgress={handleProgress}
-                config={{
-                  file: {
-                    attributes: {
-                      controlsList: 'nodownload',
-                    },
-                  },
-                }}
+                config={fileConfig}
+                // config={
+                //   {
+                //     file: { attributes: { controlsList: 'nodownload' } },
+                //   } as NonNullable<ReactPlayerProps['config']>
+                // }
               />
             ) : (
               <div className='course__no-video'>

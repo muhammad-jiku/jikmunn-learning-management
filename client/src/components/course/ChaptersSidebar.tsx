@@ -53,7 +53,10 @@ const ChaptersSidebar = () => {
   };
 
   return (
-    <div ref={sidebarRef} className='chapters-sidebar'>
+    <div
+      ref={sidebarRef}
+      className='chapters-sidebar animate-in fade-in slide-in-from-left'
+    >
       <div className='chapters-sidebar__header'>
         <h2 className='chapters-sidebar__title'>{course.title}</h2>
         <hr className='chapters-sidebar__divider' />

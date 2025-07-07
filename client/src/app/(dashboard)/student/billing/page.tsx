@@ -22,7 +22,7 @@ import { useUser } from '@clerk/nextjs';
 import { useState } from 'react';
 
 const UserBilling = () => {
-  const [paymentType, setPaymentType] = useState('all');
+  const [paymentType, setPaymentType] = useState<string>('all');
   const { user, isLoaded } = useUser();
   const { data: transactions, isLoading: isLoadingTransactions } =
     useGetTransactionsQuery(user?.id || '', {

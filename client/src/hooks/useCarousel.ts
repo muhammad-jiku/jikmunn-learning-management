@@ -9,7 +9,7 @@ export const useCarousel = ({
   totalImages,
   interval = 5000,
 }: UseCarouselProps) => {
-  const [currentImage, setCurrentImage] = useState(0);
+  const [currentImage, setCurrentImage] = useState<number>(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
