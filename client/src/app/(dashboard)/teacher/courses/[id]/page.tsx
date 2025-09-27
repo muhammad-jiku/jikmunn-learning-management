@@ -31,11 +31,18 @@ const CourseEditor = () => {
   const params = useParams();
   const id = params.id as string;
   const { data: course, isLoading, refetch } = useGetCourseQuery(id);
+  console.log('Course data in CourseEditor page:', course);
+
   const [updateCourse] = useUpdateCourseMutation();
   const [getUploadVideoUrl] = useGetUploadVideoUrlMutation();
+  console.log(
+    'getUploadVideoUrl function in CourseEditor page:',
+    getUploadVideoUrl
+  );
 
   const dispatch = useAppDispatch();
   const { sections } = useAppSelector((state) => state.global.courseEditor);
+  console.log('Current sections in CourseEditor page:', sections);
 
   const methods = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),

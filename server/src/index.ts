@@ -40,7 +40,7 @@ app.use(clerkMiddleware());
 
 /* ROUTES */
 app.get('/', (req, res) => {
-  res.send('Hello World');
+  res.send('Hola Amigos! Welcome to Jikmunn Learning Management System API');
 });
 
 app.use('/courses', courseRoutes);
@@ -63,7 +63,9 @@ export const handler = async (event: any, context: any) => {
     await seed();
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Data seeded successfully' }),
+      body: JSON.stringify({
+        message: 'Data seeded successfully',
+      }),
     };
   } else {
     return serverlessApp(event, context);

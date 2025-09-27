@@ -10,6 +10,8 @@ import Link from 'next/link';
 const Navbar = ({ isCoursePage }: { isCoursePage: boolean }) => {
   const { user } = useUser();
   const userRole = user?.publicMetadata?.userType as 'student' | 'teacher';
+  console.log('User in Navbar component:', user);
+  console.log('User role in Navbar component:', userRole);
 
   return (
     <nav className='dashboard-navbar'>

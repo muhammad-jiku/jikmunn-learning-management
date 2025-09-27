@@ -75,7 +75,7 @@ const AppSidebar = () => {
                     height={20}
                     className='app-sidebar__logo'
                   />
-                  <p className='app-sidebar__title'>EDROH</p>
+                  <p className='app-sidebar__title'>Learn Now</p>
                 </div>
                 <PanelLeft className='app-sidebar__collapse-icon' />
               </div>

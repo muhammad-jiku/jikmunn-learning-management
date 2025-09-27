@@ -97,6 +97,12 @@ export const mergeSections = (
   existingSections: any[],
   newSections: any[]
 ): any[] => {
+  console.log(
+    'Merging sections. Existing:',
+    existingSections,
+    'New:',
+    newSections
+  );
   const existingSectionsMap = new Map<string, any>();
   for (const existingSection of existingSections) {
     existingSectionsMap.set(existingSection.sectionId, existingSection);
@@ -113,6 +119,7 @@ export const mergeSections = (
       existingSectionsMap.set(newSection.sectionId, section);
     }
   }
+  console.log('Merged sections:', Array.from(existingSectionsMap.values()));
 
   return Array.from(existingSectionsMap.values());
 };
@@ -121,6 +128,12 @@ export const mergeChapters = (
   existingChapters: any[],
   newChapters: any[]
 ): any[] => {
+  console.log(
+    'Merging chapters. Existing:',
+    existingChapters,
+    'New:',
+    newChapters
+  );
   const existingChaptersMap = new Map<string, any>();
   for (const existingChapter of existingChapters) {
     existingChaptersMap.set(existingChapter.chapterId, existingChapter);
@@ -132,21 +145,25 @@ export const mergeChapters = (
       ...newChapter,
     });
   }
+  console.log('Merged chapters:', Array.from(existingChaptersMap.values()));
 
   return Array.from(existingChaptersMap.values());
 };
 
 export const calculateOverallProgress = (sections: any[]): number => {
+  console.log('Calculating overall progress for sections:', sections);
   const totalChapters = sections.reduce(
     (acc: number, section: any) => acc + section.chapters.length,
     0
   );
+  console.log('Total chapters:', totalChapters);
 
   const completedChapters = sections.reduce(
     (acc: number, section: any) =>
       acc + section.chapters.filter((chapter: any) => chapter.completed).length,
     0
   );
+  console.log('Completed chapters:', completedChapters);
 
   return totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
 };

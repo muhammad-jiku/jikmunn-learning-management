@@ -20,18 +20,24 @@ export const listTransactions = async (
   res: Response
 ): Promise<void> => {
   const { userId } = req.query;
+  console.log('fetching transactions with userId:', userId);
 
   try {
     const transactions = userId
       ? await Transaction.query('userId').eq(userId).exec()
       : await Transaction.scan().exec();
+    console.log('list of transactions:', transactions);
 
-    res.json({
+    res.status(200).json({
       message: 'Transactions retrieved successfully',
       data: transactions,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving transactions', error });
+    console.log('Error fetching transactions:', error);
+    res.status(500).json({
+      message: 'Error retrieving transactions',
+      error,
+    });
   }
 };
 
@@ -40,6 +46,7 @@ export const createStripePaymentIntent = async (
   res: Response
 ): Promise<void> => {
   let { amount } = req.body;
+  console.log('Creating stripe payment intent with amount:', req.body);
 
   if (!amount || amount <= 0) {
     amount = 50;
@@ -54,17 +61,20 @@ export const createStripePaymentIntent = async (
         allow_redirects: 'never',
       },
     });
+    console.log('Created payment intent:', paymentIntent);
 
-    res.json({
+    res.status(200).json({
       message: '',
       data: {
         clientSecret: paymentIntent.client_secret,
       },
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Error creating stripe payment intent', error });
+    console.log('Error creating stripe payment intent:', error);
+    res.status(500).json({
+      message: 'Error creating stripe payment intent',
+      error,
+    });
   }
 };
 
@@ -73,10 +83,12 @@ export const createTransaction = async (
   res: Response
 ): Promise<void> => {
   const { userId, courseId, transactionId, amount, paymentProvider } = req.body;
+  console.log('Creating transaction with data:', req.body);
 
   try {
     // 1. get course info
     const course = await Course.get(courseId);
+    console.log('Course details:', course);
 
     // 2. create transaction record
     const newTransaction = new Transaction({
@@ -88,6 +100,7 @@ export const createTransaction = async (
       paymentProvider,
     });
     await newTransaction.save();
+    console.log('New transaction created:', newTransaction);
 
     // 3. create initial course progress
     const initialProgress = new UserCourseProgress({
@@ -105,6 +118,7 @@ export const createTransaction = async (
       lastAccessedTimestamp: new Date().toISOString(),
     });
     await initialProgress.save();
+    console.log('Initial course progress created:', initialProgress);
 
     // 4. add enrollment to relevant course
     await Course.update(
@@ -116,7 +130,7 @@ export const createTransaction = async (
       }
     );
 
-    res.json({
+    res.status(201).json({
       message: 'Purchased Course successfully',
       data: {
         transaction: newTransaction,
@@ -124,8 +138,10 @@ export const createTransaction = async (
       },
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'Error creating transaction and enrollment', error });
+    console.log('Error creating transaction and enrollment:', error);
+    res.status(500).json({
+      message: 'Error creating transaction and enrollment',
+      error,
+    });
   }
 };

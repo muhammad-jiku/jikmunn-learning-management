@@ -22,6 +22,7 @@ const Courses = () => {
     isLoading,
     isError,
   } = useGetCoursesQuery({ category: 'all' });
+  console.log('Courses data in teacher courses page:', courses);
 
   const [createCourse] = useCreateCourseMutation();
   const [deleteCourse] = useDeleteCourseMutation();
@@ -41,6 +42,7 @@ const Courses = () => {
       return matchesSearch && matchesCategory;
     });
   }, [courses, searchTerm, selectedCategory]);
+  console.log('Filtered courses in teacher courses page:', filteredCourses);
 
   const handleEdit = (course: Course) => {
     router.push(`/teacher/courses/${course.courseId}`, {

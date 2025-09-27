@@ -28,6 +28,7 @@ const UserBilling = () => {
     useGetTransactionsQuery(user?.id || '', {
       skip: !isLoaded || !user,
     });
+  console.log('Transactions data in UserBilling page:', transactions);
 
   const filteredData =
     transactions?.filter((transaction) => {
@@ -35,6 +36,7 @@ const UserBilling = () => {
         paymentType === 'all' || transaction.paymentProvider === paymentType;
       return matchesTypes;
     }) || [];
+  console.log('Filtered transactions data in UserBilling page:', filteredData);
 
   if (!isLoaded) return <Loading />;
   if (!user) return <div>Please sign in to view your billing information.</div>;

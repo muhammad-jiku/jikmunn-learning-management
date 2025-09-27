@@ -9,11 +9,13 @@ import {
 import React, { useEffect, useState } from 'react';
 import Loading from '../shared/Loading';
 
-if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
-  throw new Error('NEXT_PUBLIC_STRIPE_PUBLIC_KEY is not set');
+if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+  throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set');
 }
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+);
 
 const appearance: Appearance = {
   theme: 'stripe',

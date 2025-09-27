@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@clerk/clerk-js": "^5.69.3",
-    "@clerk/nextjs": "^6.23.2",
+    "@clerk/nextjs": "^6.32.0",
     "@clerk/themes": "^2.2.53",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^5.1.1",

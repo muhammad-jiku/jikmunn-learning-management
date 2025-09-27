@@ -9,29 +9,50 @@ export const listCourses = async (
   res: Response
 ): Promise<void> => {
   const { category } = req.query;
+  console.log('fetching courses with category:', category);
+
   try {
     const courses =
       category && category !== 'all'
         ? await Course.scan('category').eq(category).exec()
         : await Course.scan().exec();
-    res.json({ message: 'Courses retrieved successfully', data: courses });
+    console.log('list of courses:', courses);
+
+    res.status(200).json({
+      message: 'Courses retrieved successfully',
+      data: courses,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving courses', error });
+    console.log('Error fetching courses:', error);
+    res.status(500).json({
+      message: 'Error retrieving courses',
+      error,
+    });
   }
 };
 
 export const getCourse = async (req: Request, res: Response): Promise<void> => {
   const { courseId } = req.params;
+  console.log('Fetching course with ID:', courseId);
+
   try {
     const course = await Course.get(courseId);
     if (!course) {
       res.status(404).json({ message: 'Course not found' });
       return;
     }
+    console.log('Course details:', course);
 
-    res.json({ message: 'Course retrieved successfully', data: course });
+    res.status(200).json({
+      message: 'Course retrieved successfully',
+      data: course,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving course', error });
+    console.log('Error fetching course:', error);
+    res.status(500).json({
+      message: 'Error retrieving course',
+      error,
+    });
   }
 };
 
@@ -41,6 +62,7 @@ export const createCourse = async (
 ): Promise<void> => {
   try {
     const { teacherId, teacherName } = req.body;
+    console.log('Creating course for teacher:', req.body);
 
     if (!teacherId || !teacherName) {
       res.status(400).json({ message: 'Teacher Id and name are required' });
@@ -62,10 +84,18 @@ export const createCourse = async (
       enrollments: [],
     });
     await newCourse.save();
+    console.log('New course created:', newCourse);
 
-    res.json({ message: 'Course created successfully', data: newCourse });
+    res.status(201).json({
+      message: 'Course created successfully',
+      data: newCourse,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating course', error });
+    console.log('Error creating course:', error);
+    res.status(500).json({
+      message: 'Error creating course',
+      error,
+    });
   }
 };
 
@@ -76,6 +106,9 @@ export const updateCourse = async (
   const { courseId } = req.params;
   const updateData = { ...req.body };
   const { userId } = getAuth(req);
+
+  console.log('Updating course with ID:', courseId, 'with data:', updateData);
+  console.log('Authenticated user ID:', userId);
 
   try {
     const course = await Course.get(courseId);
@@ -121,9 +154,15 @@ export const updateCourse = async (
 
     Object.assign(course, updateData);
     await course.save();
+    console.log('updated course data:', updateData);
+    console.log('Course updated:', course);
 
-    res.json({ message: 'Course updated successfully', data: course });
+    res.status(200).json({
+      message: 'Course updated successfully',
+      data: course,
+    });
   } catch (error) {
+    console.log('Error updating course:', error);
     res.status(500).json({ message: 'Error updating course', error });
   }
 };
@@ -134,6 +173,9 @@ export const deleteCourse = async (
 ): Promise<void> => {
   const { courseId } = req.params;
   const { userId } = getAuth(req);
+
+  console.log('Deleting course with ID:', courseId);
+  console.log('Authenticated user ID:', userId);
 
   try {
     const course = await Course.get(courseId);
@@ -148,11 +190,16 @@ export const deleteCourse = async (
         .json({ message: 'Not authorized to delete this course ' });
       return;
     }
+    console.log('Course to be deleted:', course);
 
     await Course.delete(courseId);
 
-    res.json({ message: 'Course deleted successfully', data: course });
+    res.status(200).json({
+      message: 'Course deleted successfully',
+      data: course,
+    });
   } catch (error) {
+    console.log('Error deleting course:', error);
     res.status(500).json({ message: 'Error deleting course', error });
   }
 };
@@ -162,6 +209,12 @@ export const getUploadVideoUrl = async (
   res: Response
 ): Promise<void> => {
   const { fileName, fileType } = req.body;
+  console.log(
+    'Generating upload URL for file:',
+    fileName,
+    'of type:',
+    fileType
+  );
 
   if (!fileName || !fileType) {
     res.status(400).json({ message: 'File name and type are required' });
@@ -180,15 +233,19 @@ export const getUploadVideoUrl = async (
       Expires: 60,
       ContentType: fileType,
     };
+    console.log('S3 upload parameters:', s3Params);
 
     const uploadUrl = s3.getSignedUrl('putObject', s3Params);
     const videoUrl = `${process.env.CLOUDFRONT_DOMAIN}/videos/${uniqueId}/${fileName}`;
+    console.log('Generated upload URL:', uploadUrl);
+    console.log('Video will be accessible at URL:', videoUrl);
 
-    res.json({
+    res.status(200).json({
       message: 'Upload URL generated successfully',
       data: { uploadUrl, videoUrl },
     });
   } catch (error) {
+    console.log('Error generating upload URL:', error);
     res.status(500).json({ message: 'Error generating upload URL', error });
   }
 };
