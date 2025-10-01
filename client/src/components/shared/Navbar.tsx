@@ -48,7 +48,7 @@ const Navbar = ({ isCoursePage }: { isCoursePage: boolean }) => {
             appearance={{
               baseTheme: dark,
               elements: {
-                userButtonOuterIdentifier: 'text-customgreys-dirtyGrey',
+                userButtonOuterIdentifier: 'text-customgreys-dirty-grey',
                 userButtonBox: 'scale-90 sm:scale-100',
               },
             }}

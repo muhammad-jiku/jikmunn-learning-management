@@ -35,7 +35,7 @@ const CourseCard = ({ course, onGoToCourse }: CourseCardProps) => {
             </AvatarFallback>
           </Avatar>
 
-          <p className='text-sm text-customgreys-dirtyGrey'>
+          <p className='text-sm text-customgreys-dirty-grey'>
             {course.teacherName}
           </p>
         </div>

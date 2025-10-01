@@ -100,7 +100,7 @@ const AppSidebar = () => {
                   size='lg'
                   className={cn(
                     'app-sidebar__nav-button',
-                    !isActive && 'text-customgreys-dirtyGrey'
+                    !isActive && 'text-customgreys-dirty-grey'
                   )}
                 >
                   <Link

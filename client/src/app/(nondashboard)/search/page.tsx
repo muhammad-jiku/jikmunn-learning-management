@@ -53,6 +53,7 @@ const Search = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
       className='search'
+      // className='flex flex-col bg-customgreys-dark-grey h-full mx-auto w-3/4 p-4 rounded-lg'
     >
       <h1 className='search__title'>List of available courses</h1>
       <h2 className='search__subtitle'>{courses.length} courses avaiable</h2>

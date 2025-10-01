@@ -5,7 +5,7 @@ const Footer = () => {
 
   return (
     <div className='footer'>
-      <p>&copy; {year} jikmunn. All Rights Reserved.</p>
+      <p>&copy; {year} Learn Now. All Rights Reserved.</p>
       <div className='footer__links'>
         {['About', 'Privacy Policy', 'Licensing', 'Contact'].map((item) => (
           <Link

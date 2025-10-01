@@ -12,7 +12,7 @@ const UserProfilePage = () => {
         appearance={{
           baseTheme: dark,
           elements: {
-            scrollBox: 'bg-customgreys-darkGrey',
+            scrollBox: 'bg-customgreys-dark-grey',
             navbar: {
               '& > div:nth-child(1)': {
                 background: 'none',

@@ -19,11 +19,15 @@ const SignInComponent = () => {
       return `/checkout?step=2&id=${courseId}&showSignUp=true`;
     }
 
-    const userType = user?.publicMetadata?.userType as string;
-    if (userType === 'teacher') {
-      return '/teacher/courses';
-    }
-    return '/student/courses';
+    // const userType = user?.publicMetadata?.userType as string;
+    // if (userType === 'teacher') {
+    //   return '/teacher/courses';
+    // } else {
+    //   return '/student/courses';
+    // }
+    return user && user?.publicMetadata?.userType === 'teacher'
+      ? '/teacher/courses'
+      : '/student/courses';
   };
 
   return (

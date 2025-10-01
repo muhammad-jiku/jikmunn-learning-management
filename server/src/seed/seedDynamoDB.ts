@@ -17,10 +17,13 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 // 1️⃣ Create a V2‑style DynamoDB instance via Dynamoose’s own constructor:
 const customDdb = new dynamoose.aws.ddb.DynamoDB({
-  region: process.env.AWS_REGION || 'us-east-2',
+  region: process.env.AWS_REGION!,
   credentials: isProduction
     ? undefined
-    : { accessKeyId: 'dummyKey123', secretAccessKey: 'dummyKey123' },
+    : {
+        accessKeyId: 'dummy',
+        secretAccessKey: 'dummy',
+      },
   // Only set `endpoint` if you really need a custom URL in prod;
   // for local, you can omit this and call `.local()` instead.
   endpoint: isProduction ? undefined : 'http://localhost:8000',

@@ -4,6 +4,13 @@ import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import Course from '../models/courseModel';
 
+const s3 = new AWS.S3();
+
+const sanitizeFilename = (name: string) =>
+  name
+    .replace(/[^a-zA-Z0-9.\-_]/g, '_') // keep ., -, _
+    .replace(/_{2,}/g, '_');
+
 export const listCourses = async (
   req: Request,
   res: Response
@@ -222,8 +229,6 @@ export const getUploadVideoUrl = async (
   }
 
   try {
-    const s3 = new AWS.S3();
-
     const uniqueId = uuidv4();
     const s3Key = `videos/${uniqueId}/${fileName}`;
 

@@ -53,7 +53,8 @@ const TeacherCourseCard = ({
             </span>
           </p>
           {course.enrollments && (
-            <p className='ml-1 mt-1 inline-block text-secondary bg-secondary/10 text-sm font-normal'>
+            <p className='ml-1 mt-1 inline-block text-secondary text-sm font-normal'>
+              {/* <p className='ml-1 mt-1 inline-block text-secondary bg-secondary/10 text-sm font-normal'> */}
               <span className='font-bold text-white-100'>
                 {course.enrollments.length}
               </span>{' '}

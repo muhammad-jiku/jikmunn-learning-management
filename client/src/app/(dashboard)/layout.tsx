@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
 export default function DashboardLayout({
   children,
 }: {
@@ -18,6 +17,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [courseId, setCourseId] = useState<string | null>(null);
   const { user, isLoaded } = useUser();
+
   const isCoursePage =
     /^\/student\/courses\/[^\/]+(?:\/chapters\/[^\/]+)?$/.test(pathname);
 

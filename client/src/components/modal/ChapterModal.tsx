@@ -130,7 +130,7 @@ const ChapterModal = () => {
               name='video'
               render={({ field: { onChange, value } }) => (
                 <FormItem>
-                  <FormLabel className='text-customgreys-dirtyGrey text-sm'>
+                  <FormLabel className='text-customgreys-dirty-grey text-sm'>
                     Chapter Video
                   </FormLabel>
                   <FormControl>
@@ -144,7 +144,7 @@ const ChapterModal = () => {
                             onChange(file);
                           }
                         }}
-                        className='border-none bg-customgreys-darkGrey py-2 cursor-pointer'
+                        className='border-none bg-customgreys-dark-grey py-2 cursor-pointer'
                       />
                       {typeof value === 'string' && value && (
                         <div className='my-2 text-sm text-gray-600'>

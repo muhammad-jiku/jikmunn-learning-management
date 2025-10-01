@@ -6,7 +6,10 @@ import Link from 'next/link';
 
 const CompletionPage = () => {
   return (
-    <div className='completion'>
+    <div
+      className='completion'
+      // className='flex flex-col h-full items-center justify-center bg-customgreys-dark-grey p-2'
+    >
       <div className='completion__content'>
         <div className='completion__icon'>
           <Check className='w-16 h-16' />
@@ -26,7 +29,7 @@ const CompletionPage = () => {
         </p>
       </div>
       <div className='completion__action'>
-        <Link href='user/courses' scroll={false}>
+        <Link href='student/courses' scroll={false}>
           Go to Courses
         </Link>
       </div>

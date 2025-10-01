@@ -49,7 +49,7 @@ app.use('/transactions', requireAuth(), transactionRoutes);
 app.use('/users/course-progress', requireAuth(), userCourseProgressRoutes);
 
 /* SERVER */
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 if (!isProduction) {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);

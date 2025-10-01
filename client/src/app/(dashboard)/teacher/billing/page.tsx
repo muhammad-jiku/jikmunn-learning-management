@@ -75,9 +75,13 @@ const TeacherBilling = () => {
             <Table className='billing__table'>
               <TableHeader className='billing__table-header'>
                 <TableRow className='billing__table-header-row'>
-                  <TableHead className='billing__table-cell'>Date</TableHead>
-                  <TableHead className='billing__table-cell'>Amount</TableHead>
-                  <TableHead className='billing__table-cell'>
+                  <TableHead className='billing__table-cell text-white-50 hover:text-white-100'>
+                    Date
+                  </TableHead>
+                  <TableHead className='billing__table-cell text-white-50 hover:text-white-100'>
+                    Amount
+                  </TableHead>
+                  <TableHead className='billing__table-cell text-white-50 hover:text-white-100'>
                     Payment Method
                   </TableHead>
                 </TableRow>

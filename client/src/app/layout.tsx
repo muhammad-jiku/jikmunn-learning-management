@@ -1,8 +1,7 @@
-import { useAppSelector } from '@/state/redux';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import { DM_Sans } from 'next/font/google';
-import { Suspense, useEffect } from 'react';
+import { Suspense } from 'react';
 import { Toaster } from 'sonner';
 import './globals.css';
 import Providers from './providers';
@@ -23,23 +22,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
-
-  // Simplified and more reliable dark mode toggle logic
-  useEffect(() => {
-    const htmlElement = document.documentElement;
-
-    if (isDarkMode) {
-      htmlElement.classList.add('dark');
-      htmlElement.classList.remove('light');
-    } else {
-      htmlElement.classList.remove('dark');
-      htmlElement.classList.add('light');
-    }
-
-    // Clean up function is not needed since we're managing the state properly
-  }, [isDarkMode]);
-
   return (
     <ClerkProvider>
       <html lang='en' suppressHydrationWarning>

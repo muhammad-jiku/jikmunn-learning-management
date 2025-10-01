@@ -14,7 +14,7 @@ const NonDashboardNavbar = () => {
       <div className='nondashboard-navbar__container'>
         <div className='nondashboard-navbar__search'>
           <Link href='/' className='nondashboard-navbar__brand' scroll={false}>
-            jikmunn
+            Learn Now
           </Link>
           <div className='flex items-center gap-4'>
             <div className='relative group'>
@@ -44,7 +44,7 @@ const NonDashboardNavbar = () => {
               appearance={{
                 baseTheme: dark,
                 elements: {
-                  userButtonOuterIdentifier: 'text-customgreys-dirtyGrey',
+                  userButtonOuterIdentifier: 'text-customgreys-dirty-grey',
                   userButtonBox: 'scale-90 sm:scale-100',
                 },
               }}
@@ -61,7 +61,7 @@ const NonDashboardNavbar = () => {
               className='nondashboard-navbar__auth-button--login'
               scroll={false}
             >
-              Log in
+              Sign in
             </Link>
             <Link
               href='/signup'

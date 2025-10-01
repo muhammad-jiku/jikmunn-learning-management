@@ -90,10 +90,10 @@ const CourseEditor = () => {
   };
 
   return (
-    <div>
+    <div className='bg-customgreys-secondarybg'>
       <div className='flex items-center gap-5 mb-5'>
         <button
-          className='flex items-center border border-customgreys-dirtyGrey rounded-lg p-2 gap-2 cursor-pointer hover:bg-customgreys-dirtyGrey hover:text-white-100 text-customgreys-dirtyGrey'
+          className='flex items-center border border-customgreys-dirty-grey rounded-lg p-2 gap-2 cursor-pointer hover:bg-customgreys-dirty-grey hover:text-white-100 text-customgreys-dirty-grey'
           onClick={() => router.push('/teacher/courses', { scroll: false })}
         >
           <ArrowLeft className='w-4 h-4' />
@@ -179,7 +179,7 @@ const CourseEditor = () => {
               </div>
             </div>
 
-            <div className='bg-customgreys-darkGrey mt-4 md:mt-0 p-4 rounded-lg basis-1/2'>
+            <div className='bg-customgreys-dark-grey mt-4 md:mt-0 p-4 rounded-lg basis-1/2'>
               <div className='flex justify-between items-center mb-2'>
                 <h2 className='text-2xl font-semibold text-secondary-foreground'>
                   Sections

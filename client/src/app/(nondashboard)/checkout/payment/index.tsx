@@ -32,20 +32,20 @@ const PaymentPageContent = () => {
       return;
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL;
-    console.log('base url', baseUrl);
+    // const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL;
+    // console.log('base url', baseUrl);
 
-    // const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL
-    //   ? `http://${process.env.NEXT_PUBLIC_LOCAL_URL}`
-    //   : process.env.NEXT_PUBLIC_VERCEL_URL
-    //   ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-    //   : undefined;
+    const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL
+      ? `http://${process.env.NEXT_PUBLIC_LOCAL_URL}`
+      : process.env.NEXT_PUBLIC_AMPLIFY_URL
+      ? `https://${process.env.NEXT_PUBLIC_AMPLIFY_URL}`
+      : undefined;
 
     const result = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${process.env.NEXT_PUBLIC_STRIPE_REDIRECT_URL}&id=${courseId}`,
-        // return_url: `${baseUrl}/checkout?step=3&id=${courseId}`,
+        // return_url: `${process.env.NEXT_PUBLIC_STRIPE_REDIRECT_URL}&id=${courseId}`,
+        return_url: `${baseUrl}/checkout?step=3&id=${courseId}`,
       },
       redirect: 'if_required',
     });
@@ -112,7 +112,8 @@ const PaymentPageContent = () => {
       {/* Navigation Buttons */}
       <div className='payment__actions'>
         <Button
-          className='hover:bg-white-50/10'
+          // className='hover:bg-white-50/10'
+          className='bg-white text-customgreys-dark-grey hover:bg-customgreys-dark-grey hover:text-white border-white-50 hover:border-customgreys-dark-grey'
           onClick={handleSignOutAndNavigate}
           variant='outline'
           type='button'
