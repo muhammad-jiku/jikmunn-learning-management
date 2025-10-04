@@ -311,77 +311,187 @@ export const createCourseFormData = (
   return formData;
 };
 
+const sanitizeFilename = (filename: string): string => {
+  return filename
+    .replace(/[^a-zA-Z0-9.\-]/g, '_')
+    .replace(/_{2,}/g, '_')
+    .toLowerCase();
+};
+
 export const uploadAllVideos = async (
   localSections: Section[],
   courseId: string,
   getUploadVideoUrl: any
 ) => {
+  // console.log('🚀 STARTING uploadAllVideos - Course ID:', courseId);
+
+  // Create a deep copy to avoid mutating Redux state
   const updatedSections = localSections.map((section) => ({
     ...section,
-    chapters: section.chapters.map((chapter) => ({
-      ...chapter,
-    })),
+    chapters: [...section.chapters], // Create new chapters array
   }));
 
+  let hasVideoFiles = false;
+
   for (let i = 0; i < updatedSections.length; i++) {
-    for (let j = 0; j < updatedSections[i].chapters.length; j++) {
-      const chapter = updatedSections[i].chapters[j];
-      if (chapter.video instanceof File && chapter.video.type === 'video/mp4') {
+    const section = updatedSections[i];
+
+    for (let j = 0; j < section.chapters.length; j++) {
+      const chapter = section.chapters[j];
+
+      // console.log(`🔍 Checking chapter: ${chapter.title}`, {
+      //   videoType: typeof chapter.video,
+      //   videoValue: chapter.video,
+      //   currentType: chapter.type,
+      // });
+
+      // Only process if video is a File and type should be Video
+      if (chapter.video instanceof File) {
+        hasVideoFiles = true;
+        // console.log('🎬 Found video file to upload:', chapter.video.name);
+
         try {
           const updatedChapter = await uploadVideo(
             chapter,
             courseId,
-            updatedSections[i].sectionId,
+            section.sectionId,
             getUploadVideoUrl
           );
-          updatedSections[i].chapters[j] = updatedChapter;
+
+          // console.log('✅ Video uploaded, updating chapter:', {
+          //   oldVideo: chapter.video,
+          //   newVideo: updatedChapter.video,
+          //   oldType: chapter.type,
+          //   newType: updatedChapter.type,
+          // });
+
+          // Create a new chapters array with the updated chapter
+          updatedSections[i] = {
+            ...updatedSections[i],
+            chapters: updatedSections[i].chapters.map((chap, index) =>
+              index === j ? updatedChapter : chap
+            ),
+          };
         } catch (error) {
-          console.error(
-            `Failed to upload video for chapter ${chapter.chapterId}:`,
+          console.log(
+            '❌ Video upload failed, keeping chapter as Text:',
             error
           );
+          // Create a new chapters array with the failed chapter
+          updatedSections[i] = {
+            ...updatedSections[i],
+            chapters: updatedSections[i].chapters.map((chap, index) =>
+              index === j
+                ? {
+                    ...chap,
+                    video: '',
+                    type: 'Text' as const,
+                  }
+                : chap
+            ),
+          };
         }
+      } else if (chapter.type === 'Video' && !chapter.video) {
+        // If chapter is marked as Video but has no video URL, revert to Text
+        // console.log(
+        //   '⚠️ Chapter marked as Video but has no video, reverting to Text'
+        // );
+        updatedSections[i] = {
+          ...updatedSections[i],
+          chapters: updatedSections[i].chapters.map((chap, index) =>
+            index === j
+              ? {
+                  ...chap,
+                  type: 'Text' as const,
+                  video: '',
+                }
+              : chap
+          ),
+        };
       }
     }
   }
 
+  if (!hasVideoFiles) {
+    console.log('ℹ️ No video files found to upload');
+  }
+
+  // console.log('🏁 FINAL sections:', JSON.stringify(updatedSections, null, 2));
   return updatedSections;
 };
 
-async function uploadVideo(
+const uploadVideo = async (
   chapter: Chapter,
   courseId: string,
   sectionId: string,
   getUploadVideoUrl: any
-) {
+) => {
   const file = chapter.video as File;
 
+  // console.log('🎬 STARTING uploadVideo:', {
+  //   chapterId: chapter.chapterId,
+  //   courseId,
+  //   sectionId,
+  //   fileName: file.name,
+  //   fileSize: file.size,
+  //   fileType: file.type,
+  // });
+
   try {
+    const sanitizedFileName = sanitizeFilename(file.name);
+
+    // Get upload URL
+    // console.log('🔄 Getting upload URL...');
     const { uploadUrl, videoUrl } = await getUploadVideoUrl({
-      courseId,
-      sectionId,
+      courseId: courseId,
+      sectionId: sectionId,
       chapterId: chapter.chapterId,
-      fileName: file.name,
+      fileName: sanitizedFileName,
       fileType: file.type,
     }).unwrap();
 
-    await fetch(uploadUrl, {
+    // console.log('📤 Upload URL received:', uploadUrl.substring(0, 100) + '...');
+    // console.log('📺 Video URL that will be saved:', videoUrl);
+
+    // Upload the file
+    // console.log('⬆️  Starting file upload...');
+    const response = await fetch(uploadUrl, {
       method: 'PUT',
       headers: {
         'Content-Type': file.type,
       },
       body: file,
     });
-    toast.success(
-      `Video uploaded successfully for chapter ${chapter.chapterId}`
+
+    // console.log('📨 Upload response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('❌ Upload failed with response:', errorText);
+      throw new Error(
+        `Upload failed with status ${response.status}: ${errorText}`
+      );
+    }
+
+    // console.log('✅ Upload successful!');
+    // console.log('💾 Returning chapter with video URL:', videoUrl);
+
+    toast.success(`Video uploaded successfully for chapter ${chapter.title}`);
+
+    return {
+      ...chapter,
+      video: videoUrl,
+      type: 'Video' as const,
+    };
+  } catch (error) {
+    console.log('💥 Upload video error:', error);
+    toast.error(
+      `Failed to upload video: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
     );
 
-    return { ...chapter, video: videoUrl };
-  } catch (error) {
-    console.error(
-      `Failed to upload video for chapter ${chapter.chapterId}:`,
-      error
-    );
+    // Re-throw the error so uploadAllVideos can catch it
     throw error;
   }
-}
+};

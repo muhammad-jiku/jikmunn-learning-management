@@ -58,7 +58,7 @@ async function createTables() {
       });
       console.log(`✔ Table is active: ${tableName}`);
     } catch (err: any) {
-      console.error(`Error ensuring table ${tableName}:`, err.message);
+      console.log(`Error ensuring table ${tableName}:`, err.message);
     }
   }
 }
@@ -73,7 +73,7 @@ async function seedData(tableName: string, filePath: string) {
     try {
       await dynamoose.model(modelName).create(item);
     } catch (err) {
-      console.error(`Failed to add item to ${modelName}:`, err);
+      console.log(`Failed to add item to ${modelName}:`, err);
     }
   }
   console.log(`✔ Seeded ${modelName}`);
@@ -94,7 +94,7 @@ export default async function seed() {
 
 if (require.main === module) {
   seed().catch((error) => {
-    console.error('Failed to run seed script:', error);
+    console.log('Failed to run seed script:', error);
     process.exit(1);
   });
 }

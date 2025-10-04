@@ -1,29 +1,31 @@
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getAuth } from '@clerk/express';
-import AWS from 'aws-sdk';
+// import AWS from 'aws-sdk';
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import Course from '../models/courseModel';
 
-const s3 = new AWS.S3();
+// const s3 = new AWS.S3();
 
-const sanitizeFilename = (name: string) =>
-  name
-    .replace(/[^a-zA-Z0-9.\-_]/g, '_') // keep ., -, _
-    .replace(/_{2,}/g, '_');
+const sanitizeFilename = (filename: string): string => {
+  return filename
+    .replace(/[^a-zA-Z0-9.\-]/g, '_')
+    .replace(/_{2,}/g, '_')
+    .toLowerCase();
+};
 
 export const listCourses = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   const { category } = req.query;
-  console.log('fetching courses with category:', category);
 
   try {
     const courses =
       category && category !== 'all'
         ? await Course.scan('category').eq(category).exec()
         : await Course.scan().exec();
-    console.log('list of courses:', courses);
 
     res.status(200).json({
       message: 'Courses retrieved successfully',
@@ -40,7 +42,6 @@ export const listCourses = async (
 
 export const getCourse = async (req: Request, res: Response): Promise<void> => {
   const { courseId } = req.params;
-  console.log('Fetching course with ID:', courseId);
 
   try {
     const course = await Course.get(courseId);
@@ -48,7 +49,6 @@ export const getCourse = async (req: Request, res: Response): Promise<void> => {
       res.status(404).json({ message: 'Course not found' });
       return;
     }
-    console.log('Course details:', course);
 
     res.status(200).json({
       message: 'Course retrieved successfully',
@@ -69,7 +69,6 @@ export const createCourse = async (
 ): Promise<void> => {
   try {
     const { teacherId, teacherName } = req.body;
-    console.log('Creating course for teacher:', req.body);
 
     if (!teacherId || !teacherName) {
       res.status(400).json({ message: 'Teacher Id and name are required' });
@@ -91,7 +90,6 @@ export const createCourse = async (
       enrollments: [],
     });
     await newCourse.save();
-    console.log('New course created:', newCourse);
 
     res.status(201).json({
       message: 'Course created successfully',
@@ -113,9 +111,6 @@ export const updateCourse = async (
   const { courseId } = req.params;
   const updateData = { ...req.body };
   const { userId } = getAuth(req);
-
-  console.log('Updating course with ID:', courseId, 'with data:', updateData);
-  console.log('Authenticated user ID:', userId);
 
   try {
     const course = await Course.get(courseId);
@@ -161,8 +156,6 @@ export const updateCourse = async (
 
     Object.assign(course, updateData);
     await course.save();
-    console.log('updated course data:', updateData);
-    console.log('Course updated:', course);
 
     res.status(200).json({
       message: 'Course updated successfully',
@@ -181,9 +174,6 @@ export const deleteCourse = async (
   const { courseId } = req.params;
   const { userId } = getAuth(req);
 
-  console.log('Deleting course with ID:', courseId);
-  console.log('Authenticated user ID:', userId);
-
   try {
     const course = await Course.get(courseId);
     if (!course) {
@@ -197,7 +187,6 @@ export const deleteCourse = async (
         .json({ message: 'Not authorized to delete this course ' });
       return;
     }
-    console.log('Course to be deleted:', course);
 
     await Course.delete(courseId);
 
@@ -215,42 +204,91 @@ export const getUploadVideoUrl = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { fileName, fileType } = req.body;
-  console.log(
-    'Generating upload URL for file:',
+  const {
+    courseId: paramCourseId,
+    sectionId: paramSectionId,
+    chapterId: paramChapterId,
+  } = req.params;
+  const {
     fileName,
-    'of type:',
-    fileType
-  );
+    fileType,
+    courseId: bodyCourseId,
+    sectionId: bodySectionId,
+    chapterId: bodyChapterId,
+  } = req.body;
 
-  if (!fileName || !fileType) {
-    res.status(400).json({ message: 'File name and type are required' });
+  const courseId = paramCourseId || bodyCourseId;
+  const sectionId = paramSectionId || bodySectionId;
+  const chapterId = paramChapterId || bodyChapterId;
+
+  // console.log('🔍 getUploadVideoUrl - Received request:', {
+  //   params: req.params,
+  //   body: req.body,
+  //   resolvedIds: { courseId, sectionId, chapterId },
+  // });
+
+  // Validate all required fields
+  if (!fileName || !fileType || !courseId || !sectionId || !chapterId) {
+    // console.log('❌ Missing required fields:', {
+    //   fileName,
+    //   fileType,
+    //   courseId,
+    //   sectionId,
+    //   chapterId,
+    // });
+    res.status(400).json({
+      message: 'All fields are required',
+      received: { fileName, fileType, courseId, sectionId, chapterId },
+    });
     return;
   }
 
   try {
+    // console.log('🔧 Creating S3 client...');
+    const s3Client = new S3Client({
+      region: process.env.AWS_REGION!,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      },
+    });
+
+    const sanitizedFileName = sanitizeFilename(fileName);
     const uniqueId = uuidv4();
-    const s3Key = `videos/${uniqueId}/${fileName}`;
+    const s3Key = `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/${uniqueId}-${sanitizedFileName}`;
 
-    const s3Params = {
-      Bucket: process.env.S3_BUCKET_NAME || '',
+    // console.log('🗂️  Generated S3 key:', s3Key);
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME!,
       Key: s3Key,
-      Expires: 60,
       ContentType: fileType,
-    };
-    console.log('S3 upload parameters:', s3Params);
+    });
 
-    const uploadUrl = s3.getSignedUrl('putObject', s3Params);
-    const videoUrl = `${process.env.CLOUDFRONT_DOMAIN}/videos/${uniqueId}/${fileName}`;
-    console.log('Generated upload URL:', uploadUrl);
-    console.log('Video will be accessible at URL:', videoUrl);
+    // console.log('🔗 Generating signed URL...');
+    const uploadUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    });
+
+    const cloudfrontDomain = process.env.CLOUDFRONT_DOMAIN!;
+    const videoUrl = cloudfrontDomain.startsWith('https://')
+      ? `${cloudfrontDomain}/${s3Key}`
+      : `https://${cloudfrontDomain}/${s3Key}`;
+
+    // console.log('✅ Generated URLs:', {
+    //   uploadUrl: uploadUrl.substring(0, 100) + '...',
+    //   videoUrl,
+    // });
 
     res.status(200).json({
       message: 'Upload URL generated successfully',
       data: { uploadUrl, videoUrl },
     });
   } catch (error) {
-    console.log('Error generating upload URL:', error);
-    res.status(500).json({ message: 'Error generating upload URL', error });
+    console.log('💥 Error generating upload URL:', error);
+    res.status(500).json({
+      message: 'Error generating upload URL',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };

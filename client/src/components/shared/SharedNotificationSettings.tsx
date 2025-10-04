@@ -50,7 +50,7 @@ const SharedNotificationSettings = ({
     try {
       await updateUser(updatedUser);
     } catch (error) {
-      console.error('Failed to update user settings: ', error);
+      console.log('Failed to update user settings: ', error);
     }
   };
 

@@ -53,12 +53,6 @@ const Course = () => {
   if (!user) return <div>Please sign in to view this course.</div>;
   if (!course || !userProgress) return <div>Error loading course</div>;
 
-  console.log('user in course chapter page', user);
-  console.log('course in course chapter page', course);
-  console.log('userProgress in course chapter page', userProgress);
-  console.log('currentSection in course chapter page', currentSection);
-  console.log('currentChapter in course chapter page', currentChapter);
-
   return (
     <div className='course'>
       <div className='course__container'>

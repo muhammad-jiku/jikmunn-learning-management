@@ -25,24 +25,20 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const CourseEditor = () => {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+
   const { data: course, isLoading, refetch } = useGetCourseQuery(id);
-  console.log('Course data in CourseEditor page:', course);
 
   const [updateCourse] = useUpdateCourseMutation();
   const [getUploadVideoUrl] = useGetUploadVideoUrlMutation();
-  console.log(
-    'getUploadVideoUrl function in CourseEditor page:',
-    getUploadVideoUrl
-  );
 
   const dispatch = useAppDispatch();
   const { sections } = useAppSelector((state) => state.global.courseEditor);
-  console.log('Current sections in CourseEditor page:', sections);
 
   const methods = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
@@ -70,24 +66,74 @@ const CourseEditor = () => {
 
   const onSubmit = async (data: CourseFormData) => {
     try {
-      const updatedSections = await uploadAllVideos(
-        sections,
-        id,
-        getUploadVideoUrl
-      );
+      // console.log('🚀 STARTING course update - Course ID:', id);
 
-      const formData = createCourseFormData(data, updatedSections);
+      let updatedSections = sections;
 
-      await updateCourse({
+      try {
+        // console.log('📤 Starting video uploads...');
+        const uploadResult = await uploadAllVideos(
+          sections,
+          id,
+          getUploadVideoUrl
+        );
+        // console.log('✅ Video uploads completed');
+
+        // Update global state with the new sections containing video URLs
+        dispatch(setSections(uploadResult));
+        updatedSections = uploadResult; // Use the uploaded result
+      } catch (uploadError) {
+        console.log('❌ Video upload failed:', uploadError);
+        // Keep original sections if upload fails
+        updatedSections = sections;
+      }
+
+      // Final validation to ensure data consistency
+      const validatedSections = updatedSections.map((section) => ({
+        ...section,
+        chapters: section.chapters.map((chapter) => {
+          // If video exists and is a string, ensure type is Video
+          // If no video, ensure type is Text
+          const hasVideo =
+            typeof chapter.video === 'string' && chapter.video.trim() !== '';
+
+          return {
+            ...chapter,
+            video: typeof chapter.video === 'string' ? chapter.video : '',
+            type: hasVideo ? ('Video' as const) : ('Text' as const),
+          };
+        }),
+      }));
+
+      // console.log(
+      //   '📋 Final validated sections to save:',
+      //   JSON.stringify(validatedSections, null, 2)
+      // );
+
+      const formData = createCourseFormData(data, validatedSections);
+
+      // console.log('📨 Sending course update to server...');
+      const result = await updateCourse({
         courseId: id,
         formData,
       }).unwrap();
 
+      console.log('✅ Course update successful!', result);
+      toast.success('Course updated successfully');
       refetch();
     } catch (error) {
-      console.error('Failed to update course:', error);
+      console.log('💥 Course update failed:', error);
+      toast.error('Failed to update course');
     }
   };
+
+  // // Add this temporarily to your CourseEditor component
+  // useEffect(() => {
+  //   console.log(
+  //     '🔄 Current sections in state:',
+  //     JSON.stringify(sections, null, 2)
+  //   );
+  // }, [sections]);
 
   return (
     <div className='bg-customgreys-secondarybg'>

@@ -28,7 +28,6 @@ const TeacherBilling = () => {
     useGetTransactionsQuery(user?.id || '', {
       skip: !isLoaded || !user,
     });
-  console.log('Transactions data in Teacher Billing page:', transactions);
 
   const filteredData =
     transactions?.filter((transaction) => {
@@ -36,10 +35,6 @@ const TeacherBilling = () => {
         paymentType === 'all' || transaction.paymentProvider === paymentType;
       return matchesTypes;
     }) || [];
-  console.log(
-    'Filtered transactions data in Teacher Billing page:',
-    filteredData
-  );
 
   if (!isLoaded) return <Loading />;
   if (!user) return <div>Please sign in to view your billing information.</div>;

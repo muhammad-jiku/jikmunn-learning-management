@@ -1,0 +1,36 @@
+# Node / build artifacts
+node_modules
+dist
+.build
+.next
+out
+coverage
+npm-debug.log*
+yarn-error.log
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+
+# VCS
+.git
+.gitignore
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# Logs
+*.log
+
+# Docker file system
+docker-compose*.yml
+
+# Local environment and secrets
+.env
+.env.local
+.env.*.local
+
+# Misc
+README.md

@@ -10,9 +10,6 @@ export const getUserEnrolledCourses = async (
 ): Promise<void> => {
   const { userId } = req.params;
   const auth = getAuth(req);
-  console.log('Fetching enrolled courses for user ID:', userId);
-  console.log('Auth user ID:', auth?.userId);
-  console.log('Auth object:', auth);
 
   if (!auth || auth.userId !== userId) {
     res.status(403).json({ message: 'Access denied' });
@@ -23,13 +20,10 @@ export const getUserEnrolledCourses = async (
     const enrolledCourses = await UserCourseProgress.query('userId')
       .eq(userId)
       .exec();
-    console.log('Enrolled courses:', enrolledCourses);
 
     const courseIds = enrolledCourses.map((item: any) => item.courseId);
-    console.log('Course IDs:', courseIds);
 
     const courses = await Course.batchGet(courseIds);
-    console.log('Courses details:', courses);
 
     res.status(200).json({
       message: 'Enrolled courses retrieved successfully',
@@ -49,12 +43,12 @@ export const getUserCourseProgress = async (
   res: Response
 ): Promise<void> => {
   const { userId, courseId } = req.params;
-  console.log(
-    'Fetching course progress for user ID:',
-    userId,
-    'and course ID:',
-    courseId
-  );
+  // console.log(
+  //   'Fetching course progress for user ID:',
+  //   userId,
+  //   'and course ID:',
+  //   courseId
+  // );
 
   try {
     const progress = await UserCourseProgress.get({ userId, courseId });
@@ -64,7 +58,7 @@ export const getUserCourseProgress = async (
         .json({ message: 'Course progress not found for this user' });
       return;
     }
-    console.log('Course progress details:', progress);
+    // console.log('Course progress details:', progress);
 
     res.status(200).json({
       message: 'Course progress retrieved successfully',
@@ -85,16 +79,17 @@ export const updateUserCourseProgress = async (
   const { userId, courseId } = req.params;
   const progressData = req.body;
 
-  console.log(
-    'Updating course progress for user ID:',
-    userId,
-    'and course ID:',
-    courseId
-  );
-  console.log('Progress data received:', progressData);
+  // console.log(
+  //   'Updating course progress for user ID:',
+  //   userId,
+  //   'and course ID:',
+  //   courseId
+  // );
+  // console.log('Progress data received:', progressData);
+
   try {
     let progress = await UserCourseProgress.get({ userId, courseId });
-    console.log('Existing progress:', progress);
+    // console.log('Existing progress:', progress);
 
     if (!progress) {
       // If no progress exists, create initial progress
@@ -117,14 +112,14 @@ export const updateUserCourseProgress = async (
     }
 
     await progress.save();
-    console.log('Updated progress:', progress);
+    // console.log('Updated progress:', progress);
 
     res.status(200).json({
       message: 'User course progress updated successfully!',
       data: progress,
     });
   } catch (error) {
-    console.error('Error updating progress:', error);
+    console.log('Error updating progress:', error);
     res.status(500).json({
       message: 'Error updating user course progress',
       error,

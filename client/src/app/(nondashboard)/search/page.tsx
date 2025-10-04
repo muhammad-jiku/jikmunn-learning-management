@@ -11,11 +11,8 @@ import { useEffect, useState } from 'react';
 const Search = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
-  console.log('Search params in search page:', searchParams);
-  console.log('Search param id:', id);
 
   const { data: courses, isLoading, isError } = useGetCoursesQuery({});
-  console.log('Courses data in search page:', courses);
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const router = useRouter();

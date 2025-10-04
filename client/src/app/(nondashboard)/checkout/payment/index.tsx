@@ -32,9 +32,6 @@ const PaymentPageContent = () => {
       return;
     }
 
-    // const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL;
-    // console.log('base url', baseUrl);
-
     const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL
       ? `http://${process.env.NEXT_PUBLIC_LOCAL_URL}`
       : process.env.NEXT_PUBLIC_AMPLIFY_URL

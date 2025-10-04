@@ -20,13 +20,11 @@ export const listTransactions = async (
   res: Response
 ): Promise<void> => {
   const { userId } = req.query;
-  console.log('fetching transactions with userId:', userId);
 
   try {
     const transactions = userId
       ? await Transaction.query('userId').eq(userId).exec()
       : await Transaction.scan().exec();
-    console.log('list of transactions:', transactions);
 
     res.status(200).json({
       message: 'Transactions retrieved successfully',
@@ -46,7 +44,6 @@ export const createStripePaymentIntent = async (
   res: Response
 ): Promise<void> => {
   let { amount } = req.body;
-  console.log('Creating stripe payment intent with amount:', req.body);
 
   if (!amount || amount <= 0) {
     amount = 50;
@@ -61,7 +58,6 @@ export const createStripePaymentIntent = async (
         allow_redirects: 'never',
       },
     });
-    console.log('Created payment intent:', paymentIntent);
 
     res.status(200).json({
       message: '',
@@ -83,12 +79,10 @@ export const createTransaction = async (
   res: Response
 ): Promise<void> => {
   const { userId, courseId, transactionId, amount, paymentProvider } = req.body;
-  console.log('Creating transaction with data:', req.body);
 
   try {
     // 1. get course info
     const course = await Course.get(courseId);
-    console.log('Course details:', course);
 
     // 2. create transaction record
     const newTransaction = new Transaction({
@@ -100,7 +94,6 @@ export const createTransaction = async (
       paymentProvider,
     });
     await newTransaction.save();
-    console.log('New transaction created:', newTransaction);
 
     // 3. create initial course progress
     const initialProgress = new UserCourseProgress({
@@ -118,7 +111,6 @@ export const createTransaction = async (
       lastAccessedTimestamp: new Date().toISOString(),
     });
     await initialProgress.save();
-    console.log('Initial course progress created:', initialProgress);
 
     // 4. add enrollment to relevant course
     await Course.update(

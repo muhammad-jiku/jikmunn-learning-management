@@ -133,8 +133,8 @@ export const api = createApi({
       { uploadUrl: string; videoUrl: string },
       {
         courseId: string;
-        chapterId: string;
         sectionId: string;
+        chapterId: string;
         fileName: string;
         fileType: string;
       }
@@ -142,7 +142,13 @@ export const api = createApi({
       query: ({ courseId, sectionId, chapterId, fileName, fileType }) => ({
         url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/get-upload-url`,
         method: 'POST',
-        body: { fileName, fileType },
+        body: {
+          courseId,
+          sectionId,
+          chapterId,
+          fileName,
+          fileType,
+        },
       }),
     }),
 

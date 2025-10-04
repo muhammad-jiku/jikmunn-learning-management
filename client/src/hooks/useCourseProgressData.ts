@@ -13,7 +13,7 @@ export const useCourseProgressData = () => {
   const [hasMarkedComplete, setHasMarkedComplete] = useState<boolean>(false);
   const [updateProgress] = useUpdateUserCourseProgressMutation();
 
-  console.log('Params in useCourseProgressData hook:', { courseId, chapterId });
+  // console.log('Params in useCourseProgressData hook:', { courseId, chapterId });
 
   const { data: course, isLoading: courseLoading } = useGetCourseQuery(
     (courseId as string) ?? '',
@@ -21,7 +21,7 @@ export const useCourseProgressData = () => {
       skip: !courseId,
     }
   );
-  console.log('Course data in useCourseProgressData hook:', course);
+  // console.log('Course data in useCourseProgressData hook:', course);
 
   const { data: userProgress, isLoading: progressLoading } =
     useGetUserCourseProgressQuery(
@@ -33,22 +33,22 @@ export const useCourseProgressData = () => {
         skip: !isLoaded || !user || !courseId,
       }
     );
-  console.log(
-    'User progress data in useCourseProgressData hook:',
-    userProgress
-  );
+  // console.log(
+  //   'User progress data in useCourseProgressData hook:',
+  //   userProgress
+  // );
 
   const isLoading = !isLoaded || courseLoading || progressLoading;
 
   const currentSection = course?.sections.find((s) =>
     s.chapters.some((c) => c.chapterId === chapterId)
   );
-  console.log('Current section in useCourseProgressData hook:', currentSection);
+  // console.log('Current section in useCourseProgressData hook:', currentSection);
 
   const currentChapter = currentSection?.chapters.find(
     (c) => c.chapterId === chapterId
   );
-  console.log('Current chapter in useCourseProgressData hook:', currentChapter);
+  // console.log('Current chapter in useCourseProgressData hook:', currentChapter);
 
   const isChapterCompleted = () => {
     if (!currentSection || !currentChapter || !userProgress?.sections)
@@ -63,7 +63,7 @@ export const useCourseProgressData = () => {
       ) ?? false
     );
   };
-  console.log('Is chapter completed:', isChapterCompleted());
+  // console.log('Is chapter completed:', isChapterCompleted());
 
   const updateChapterProgress = (
     sectionId: string,

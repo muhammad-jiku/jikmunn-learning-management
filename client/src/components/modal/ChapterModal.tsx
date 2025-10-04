@@ -66,13 +66,31 @@ const ChapterModal = () => {
   const onSubmit = (data: ChapterFormData) => {
     if (selectedSectionIndex === null) return;
 
+    // console.log('📝 Submitted data:', data);
+    // console.log('type of video:', typeof data.video, data.video);
+
+    // Determine the type based on whether video is provided
+    const hasVideo =
+      data.video &&
+      (typeof data.video === 'string'
+        ? data.video.trim() !== ''
+        : data.video instanceof File);
+
     const newChapter: Chapter = {
       chapterId: chapter?.chapterId || uuidv4(),
       title: data.title,
       content: data.content,
-      type: data.video ? 'Video' : 'Text',
-      video: data.video,
+      type: hasVideo ? 'Video' : 'Text',
+      video: data.video || '', // Ensure video is always defined
     };
+
+    // console.log('📝 Creating/Updating chapter:', {
+    //   chapterId: newChapter.chapterId,
+    //   title: newChapter.title,
+    //   type: newChapter.type,
+    //   video: newChapter.video,
+    //   hasVideo: hasVideo,
+    // });
 
     if (selectedChapterIndex === null) {
       dispatch(
@@ -81,6 +99,7 @@ const ChapterModal = () => {
           chapter: newChapter,
         })
       );
+      toast.success('Chapter added successfully');
     } else {
       dispatch(
         editChapter({
@@ -89,12 +108,10 @@ const ChapterModal = () => {
           chapter: newChapter,
         })
       );
+      toast.success('Chapter updated successfully');
     }
 
-    toast.success(
-      `Chapter added/updated successfully but you need to save the course to apply the changes`
-    );
-    onClose();
+    onClose(); // Close the modal
   };
 
   return (
@@ -117,7 +134,6 @@ const ChapterModal = () => {
               label='Chapter Title'
               placeholder='Write chapter title here'
             />
-
             <CustomFormField
               name='content'
               label='Chapter Content'
@@ -137,10 +153,20 @@ const ChapterModal = () => {
                     <div>
                       <Input
                         type='file'
-                        accept='video/*'
+                        accept='video/mp4,video/webm,video/ogg'
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            // Validate file size (e.g., 500MB limit)
+                            if (file.size > 500 * 1024 * 1024) {
+                              toast.error('Video file must be less than 500MB');
+                              return;
+                            }
+                            // Validate file type
+                            if (!file.type.startsWith('video/')) {
+                              toast.error('Please select a valid video file');
+                              return;
+                            }
                             onChange(file);
                           }
                         }}
@@ -152,8 +178,9 @@ const ChapterModal = () => {
                         </div>
                       )}
                       {value instanceof File && (
-                        <div className='my-2 text-sm text-gray-600'>
-                          Selected file: {value.name}
+                        <div className='my-2 text-sm text-white-100'>
+                          Selected: {value.name} (
+                          {(value.size / (1024 * 1024)).toFixed(2)} MB)
                         </div>
                       )}
                     </div>

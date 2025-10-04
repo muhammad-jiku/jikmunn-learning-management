@@ -22,7 +22,6 @@ const Courses = () => {
   } = useGetUserEnrolledCoursesQuery(user?.id ?? '', {
     skip: !isLoaded || !user,
   });
-  console.log('Courses data in student courses page:', courses);
 
   const filteredCourses = useMemo(() => {
     if (!courses) return [];
@@ -36,7 +35,6 @@ const Courses = () => {
       return matchesSearch && matchesCategory;
     });
   }, [courses, searchTerm, selectedCategory]);
-  console.log('Filtered courses in student courses page:', filteredCourses);
 
   const handleGoToCourse = (course: Course) => {
     if (
