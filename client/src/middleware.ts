@@ -1,46 +1,38 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import {
+  clerkClient,
+  clerkMiddleware,
+  createRouteMatcher,
+} from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 const isStudentRoute = createRouteMatcher(['/student/(.*)']);
 const isTeacherRoute = createRouteMatcher(['/teacher/(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { sessionClaims } = await auth();
+  const { userId } = await auth();
 
-  // const userRole =
-  //   (
-  //     sessionClaims?.metadata as {
-  //       userType: 'student' | 'teacher';
-  //     }
-  //   )?.userType || 'student';
-
-  // if (isStudentRoute(req)) {
-  //   if (userRole !== 'student') {
-  //     const url = new URL('/teacher/courses', req.url);
-  //     return NextResponse.redirect(url);
-  //   }
-  // }
-
-  // if (isTeacherRoute(req)) {
-  //   if (userRole !== 'teacher') {
-  //     const url = new URL('/student/courses', req.url);
-  //     return NextResponse.redirect(url);
-  //   }
-  // }
-
-  // NOTE: don't default to 'student' here — allow `undefined` when metadata isn't present yet
-  const metadata = sessionClaims?.metadata as
-    | { userType?: 'student' | 'teacher' }
-    | undefined;
-  const userRole = metadata?.userType; // could be undefined
-
-  // If the session token doesn't contain a role, do not assume student.
-  // This avoids accidentally redirecting users during token propagation.
-  if (!userRole) {
-    return NextResponse.next();
+  // If no user is signed in, let Clerk handle the redirect
+  if (!userId) {
+    return;
   }
 
-  // Only redirect when we have a concrete role and a mismatched route
+  // Get the ClerkClient instance by calling clerkClient()
+  const client = await clerkClient();
+  // Fetch user data to get publicMetadata
+  const user = await client.users.getUser(userId);
+  const userRole =
+    (user.publicMetadata?.userType as 'student' | 'teacher') || 'student';
+
+  // // Debugging log to confirm userRole
+  // console.log(
+  //   'Middleware - userId:',
+  //   userId,
+  //   'userRole:',
+  //   userRole,
+  //   'Path:',
+  //   req.nextUrl.pathname
+  // );
+
   if (isStudentRoute(req) && userRole !== 'student') {
     const url = new URL('/teacher/courses', req.url);
     return NextResponse.redirect(url);
@@ -51,14 +43,13 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(url);
   }
 
+  // No redirect needed, proceed with the request
   return NextResponse.next();
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 };
