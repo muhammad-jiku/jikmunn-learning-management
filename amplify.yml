@@ -1,0 +1,24 @@
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - cd client && yarn install --frozen-lockfile
+        build:
+          commands:
+            - cd client && echo "CLERK_SECRET_KEY=$CLERK_SECRET_KEY" >> .env.production
+            - cd client && echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" >> .env.production
+            - cd client && echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL" >> .env.production
+            - cd client && echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY" >> .env.production
+            - cd client && echo "NEXT_PUBLIC_AMPLIFY_URL=$NEXT_PUBLIC_AMPLIFY_URL" >> .env.production
+            - cd client && yarn build
+      artifacts:
+        baseDirectory: client/.next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - client/node_modules/**/*
+          - client/.next/cache/**/*
+    appRoot: client
