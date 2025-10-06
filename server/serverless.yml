@@ -5,7 +5,7 @@ provider:
   runtime: nodejs18.x
   region: ap-southeast-1
   stage: ${opt:stage, 'prod'}
-  profile: default # Use the default AWS profile
+  profile: default # Use the AWS profile
 
 plugins:
   - serverless-dotenv-plugin
@@ -27,9 +27,10 @@ functions:
   api:
     handler: dist/index.handler
     events:
-      - path: /{proxy+}
-        method: any
-        cors: true
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
     timeout: 30
     memorySize: 512
     environment:
