@@ -28,6 +28,18 @@ export const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
 });
 
+// // Remove current cors() line and replace with:
+// const corsOptions = {
+//   origin: [
+//     'http://localhost:3000',
+//     'https://main.dyzx1mm2ql9zq.amplifyapp.com',
+//     'https://jikmunn-learning-management.vercel.app',
+//   ],
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+// };
+
 const app = express();
 app.use(express.json());
 app.use(helmet());
@@ -36,6 +48,8 @@ app.use(morgan('common'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
+// app.use(cors(corsOptions));
+// app.options('*', cors(corsOptions)); // Enable pre-flight for all routes
 app.use(clerkMiddleware());
 
 /* ROUTES */

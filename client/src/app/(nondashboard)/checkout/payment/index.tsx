@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+'use client';
+
 import CoursePreview from '@/components/course/CoursePreview';
 import StripeProvider from '@/components/payment/StripeProvider';
 import { Button } from '@/components/ui/button';
@@ -32,36 +33,72 @@ const PaymentPageContent = () => {
       return;
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL
-      ? `http://${process.env.NEXT_PUBLIC_LOCAL_URL}`
-      : process.env.NEXT_PUBLIC_VERCEL_URL
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_AMPLIFY_URL
-      ? `https://${process.env.NEXT_PUBLIC_AMPLIFY_URL}`
-      : undefined;
+    if (!user?.id) {
+      toast.error('User not authenticated');
+      return;
+    }
 
-    console.log('baseurl:', baseUrl);
+    // ✅ FIX: Use environment variable directly (simpler and more reliable)
+    const baseUrl =
+      process.env.NEXT_PUBLIC_STRIPE_REDIRECT_URL ||
+      process.env.NEXT_PUBLIC_AMPLIFY_URL ||
+      process.env.NEXT_PUBLIC_VERCEL_URL ||
+      process.env.NEXT_PUBLIC_LOCAL_URL;
 
-    const result = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        // return_url: `${process.env.NEXT_PUBLIC_STRIPE_REDIRECT_URL}&id=${courseId}`,
-        return_url: `${baseUrl}/checkout?step=3&id=${courseId}`,
-      },
-      redirect: 'if_required',
-    });
-    console.log('result', result);
+    if (!baseUrl) {
+      toast.error('Payment configuration error');
+      return;
+    }
 
-    if (result.paymentIntent?.status === 'succeeded') {
-      const transactionData: Partial<Transaction> = {
-        transactionId: result.paymentIntent.id,
-        userId: user?.id,
-        courseId: courseId,
-        paymentProvider: 'stripe',
-        amount: course?.price || 0,
-      };
+    // ✅ FIX: Ensure proper URL format (remove any double protocols)
+    const cleanBaseUrl = baseUrl.replace(/(https?:\/\/)+/, 'https://');
+    console.log('clean base url:', cleanBaseUrl);
 
-      await createTransaction(transactionData), navigateToStep(3);
+    const returnUrl = `${cleanBaseUrl}/checkout?step=3&id=${courseId}`;
+    console.log('Using return URL:', returnUrl);
+
+    try {
+      const result = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: returnUrl,
+        },
+        redirect: 'if_required',
+      });
+
+      console.log('Payment result:', result);
+
+      if (result.error) {
+        toast.error(`Payment failed: ${result.error.message}`);
+        return;
+      }
+
+      // ✅ FIX: Check for successful payment
+      if (result.paymentIntent?.status === 'succeeded') {
+        const transactionData: Partial<Transaction> = {
+          transactionId: result.paymentIntent.id,
+          userId: user.id,
+          courseId: courseId,
+          paymentProvider: 'stripe',
+          amount: course?.price || 0,
+        };
+
+        try {
+          await createTransaction(transactionData).unwrap();
+          toast.success('Payment successful!');
+          navigateToStep(3);
+        } catch (transactionError) {
+          console.log('Transaction creation failed:', transactionError);
+          toast.error(
+            'Payment successful but enrollment failed. Contact support.'
+          );
+          // Still navigate to success since payment worked
+          navigateToStep(3);
+        }
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('Payment processing failed');
     }
   };
 
@@ -80,7 +117,7 @@ const PaymentPageContent = () => {
           <CoursePreview course={course} />
         </div>
 
-        {/* Pyament Form */}
+        {/* Payment Form */}
         <div className='payment__form-container'>
           <form
             id='payment-form'
@@ -114,7 +151,6 @@ const PaymentPageContent = () => {
       {/* Navigation Buttons */}
       <div className='payment__actions'>
         <Button
-          // className='hover:bg-white-50/10'
           className='bg-white text-customgreys-dark-grey hover:bg-customgreys-dark-grey hover:text-white border-white-50 hover:border-customgreys-dark-grey'
           onClick={handleSignOutAndNavigate}
           variant='outline'
