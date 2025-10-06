@@ -40,6 +40,7 @@ const chapterSchema = new Schema({
   comments: {
     type: Array,
     schema: [commentSchema],
+    default: [],
   },
   video: {
     type: String,
@@ -61,6 +62,18 @@ const sectionSchema = new Schema({
   chapters: {
     type: Array,
     schema: [chapterSchema],
+    default: [],
+  },
+});
+
+const enrollmentSchema = new Schema({
+  userId: {
+    type: String,
+    required: true,
+  },
+  enrolledAt: {
+    type: String,
+    default: () => new Date().toISOString(),
   },
 });
 
@@ -95,6 +108,7 @@ const courseSchema = new Schema(
     },
     price: {
       type: Number,
+      default: 0,
     },
     level: {
       type: String,
@@ -109,17 +123,12 @@ const courseSchema = new Schema(
     sections: {
       type: Array,
       schema: [sectionSchema],
+      default: [],
     },
     enrollments: {
       type: Array,
-      schema: [
-        new Schema({
-          userId: {
-            type: String,
-            required: true,
-          },
-        }),
-      ],
+      schema: [enrollmentSchema],
+      default: [],
     },
   },
   {

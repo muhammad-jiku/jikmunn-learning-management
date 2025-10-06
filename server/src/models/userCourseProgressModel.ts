@@ -8,6 +8,7 @@ const chapterProgressSchema = new Schema({
   completed: {
     type: Boolean,
     required: true,
+    default: false,
   },
 });
 
@@ -19,6 +20,7 @@ const sectionProgressSchema = new Schema({
   chapters: {
     type: Array,
     schema: [chapterProgressSchema],
+    default: [],
   },
 });
 
@@ -41,10 +43,12 @@ const userCourseProgressSchema = new Schema(
     overallProgress: {
       type: Number,
       required: true,
+      default: 0,
     },
     sections: {
       type: Array,
       schema: [sectionProgressSchema],
+      default: [],
     },
     lastAccessedTimestamp: {
       type: String,

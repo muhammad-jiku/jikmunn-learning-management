@@ -7,6 +7,8 @@
     "start": "npm run build && node dist/index.js",
     "dev": "npm run build && concurrently \"npx tsc -w\" \"nodemon --exec ts-node src/index.ts\"",
     "seed": "ts-node src/seed/seedDynamodb.ts",
+    "deploy:dev": "npm run build && serverless deploy --stage dev",
+    "deploy:prod": "npm run build && serverless deploy --stage prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -45,6 +47,9 @@
     "cpx": "^1.5.0",
     "nodemon": "^3.1.10",
     "rimraf": "^6.0.1",
+    "serverless": "^3.33.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-offline": "^12.0.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

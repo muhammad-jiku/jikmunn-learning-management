@@ -29,13 +29,17 @@ const customBaseQuery = async (
         errorData?.message ||
         result.error.status.toString() ||
         'An error occurred';
-      toast.error(`Error: ${errorMessage}`);
+
+      // Only show error toast for client errors (4xx) and server errors (5xx)
+      if (result.error.status >= 400) {
+        toast.error(`Error: ${errorMessage}`);
+      }
     }
 
     const isMutationRequest =
       (args as FetchArgs).method && (args as FetchArgs).method !== 'GET';
 
-    if (isMutationRequest) {
+    if (isMutationRequest && result.data) {
       const successMessage = result.data?.message;
       if (successMessage) toast.success(successMessage);
     }
@@ -44,7 +48,7 @@ const customBaseQuery = async (
       result.data = result.data.data;
     } else if (
       result.error?.status === 204 ||
-      result.meta?.response?.status === 24
+      result.meta?.response?.status === 204
     ) {
       return { data: null };
     }
@@ -61,7 +65,7 @@ const customBaseQuery = async (
 export const api = createApi({
   baseQuery: customBaseQuery,
   reducerPath: 'api',
-  tagTypes: ['Courses', 'Users', 'UserCourseProgress'],
+  tagTypes: ['Courses', 'Users', 'UserCourseProgress', 'Transactions'],
   endpoints: (build) => ({
     /* 
     ===============
@@ -95,17 +99,25 @@ export const api = createApi({
       providesTags: (result, error, id) => [{ type: 'Courses', id }],
     }),
 
-    createCourse: build.mutation<
-      Course,
-      { teacherId: string; teacherName: string }
-    >({
-      query: (body) => ({
+    createCourse: build.mutation<Course, void>({
+      query: () => ({
         url: `courses`,
         method: 'POST',
-        body,
       }),
       invalidatesTags: ['Courses'],
     }),
+
+    // createCourse: build.mutation<
+    //   Course,
+    //   { teacherId: string; teacherName: string }
+    // >({
+    //   query: (body) => ({
+    //     url: `courses`,
+    //     method: 'POST',
+    //     body,
+    //   }),
+    //   invalidatesTags: ['Courses'],
+    // }),
 
     updateCourse: build.mutation<
       Course,
@@ -159,7 +171,9 @@ export const api = createApi({
     */
     getTransactions: build.query<Transaction[], string>({
       query: (userId) => `transactions?userId=${userId}`,
+      providesTags: ['Transactions'],
     }),
+
     createStripePaymentIntent: build.mutation<
       { clientSecret: string },
       { amount: number }
@@ -170,12 +184,14 @@ export const api = createApi({
         body: { amount },
       }),
     }),
+
     createTransaction: build.mutation<Transaction, Partial<Transaction>>({
       query: (transaction) => ({
         url: 'transactions',
         method: 'POST',
         body: transaction,
       }),
+      invalidatesTags: ['Transactions', 'Courses', 'UserCourseProgress'],
     }),
 
     /* 

@@ -1,12 +1,10 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getAuth } from '@clerk/express';
-// import AWS from 'aws-sdk';
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { clerkClient } from '..';
 import Course from '../models/courseModel';
-
-// const s3 = new AWS.S3();
 
 const sanitizeFilename = (filename: string): string => {
   return filename
@@ -35,7 +33,7 @@ export const listCourses = async (
     console.log('Error fetching courses:', error);
     res.status(500).json({
       message: 'Error retrieving courses',
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };
@@ -58,7 +56,7 @@ export const getCourse = async (req: Request, res: Response): Promise<void> => {
     console.log('Error fetching course:', error);
     res.status(500).json({
       message: 'Error retrieving course',
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };
@@ -68,16 +66,29 @@ export const createCourse = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { teacherId, teacherName } = req.body;
+    const { userId } = getAuth(req);
 
-    if (!teacherId || !teacherName) {
-      res.status(400).json({ message: 'Teacher Id and name are required' });
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
       return;
+    }
+
+    // Get teacher info from Clerk
+    let teacherName = 'Unknown Teacher';
+    try {
+      const user = await clerkClient.users.getUser(userId);
+      teacherName =
+        user.fullName ||
+        `${user.firstName} ${user.lastName}`.trim() ||
+        'Unknown Teacher';
+    } catch (error) {
+      console.log('Error fetching user from Clerk:', error);
+      // Continue with default name if Clerk call fails
     }
 
     const newCourse = new Course({
       courseId: uuidv4(),
-      teacherId,
+      teacherId: userId,
       teacherName,
       title: 'Untitled Course',
       description: '',
@@ -99,7 +110,7 @@ export const createCourse = async (
     console.log('Error creating course:', error);
     res.status(500).json({
       message: 'Error creating course',
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };
@@ -120,9 +131,7 @@ export const updateCourse = async (
     }
 
     if (course.teacherId !== userId) {
-      res
-        .status(403)
-        .json({ message: 'Not authorized to update this course ' });
+      res.status(403).json({ message: 'Not authorized to update this course' });
       return;
     }
 
@@ -163,7 +172,10 @@ export const updateCourse = async (
     });
   } catch (error) {
     console.log('Error updating course:', error);
-    res.status(500).json({ message: 'Error updating course', error });
+    res.status(500).json({
+      message: 'Error updating course',
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
   }
 };
 
@@ -182,9 +194,7 @@ export const deleteCourse = async (
     }
 
     if (course.teacherId !== userId) {
-      res
-        .status(403)
-        .json({ message: 'Not authorized to delete this course ' });
+      res.status(403).json({ message: 'Not authorized to delete this course' });
       return;
     }
 
@@ -196,7 +206,10 @@ export const deleteCourse = async (
     });
   } catch (error) {
     console.log('Error deleting course:', error);
-    res.status(500).json({ message: 'Error deleting course', error });
+    res.status(500).json({
+      message: 'Error deleting course',
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
   }
 };
 
@@ -221,21 +234,7 @@ export const getUploadVideoUrl = async (
   const sectionId = paramSectionId || bodySectionId;
   const chapterId = paramChapterId || bodyChapterId;
 
-  // console.log('🔍 getUploadVideoUrl - Received request:', {
-  //   params: req.params,
-  //   body: req.body,
-  //   resolvedIds: { courseId, sectionId, chapterId },
-  // });
-
-  // Validate all required fields
   if (!fileName || !fileType || !courseId || !sectionId || !chapterId) {
-    // console.log('❌ Missing required fields:', {
-    //   fileName,
-    //   fileType,
-    //   courseId,
-    //   sectionId,
-    //   chapterId,
-    // });
     res.status(400).json({
       message: 'All fields are required',
       received: { fileName, fileType, courseId, sectionId, chapterId },
@@ -244,7 +243,6 @@ export const getUploadVideoUrl = async (
   }
 
   try {
-    // console.log('🔧 Creating S3 client...');
     const s3Client = new S3Client({
       region: process.env.AWS_REGION!,
       credentials: {
@@ -257,15 +255,12 @@ export const getUploadVideoUrl = async (
     const uniqueId = uuidv4();
     const s3Key = `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/${uniqueId}-${sanitizedFileName}`;
 
-    // console.log('🗂️  Generated S3 key:', s3Key);
-
     const command = new PutObjectCommand({
       Bucket: process.env.S3_BUCKET_NAME!,
       Key: s3Key,
       ContentType: fileType,
     });
 
-    // console.log('🔗 Generating signed URL...');
     const uploadUrl = await getSignedUrl(s3Client, command, {
       expiresIn: 3600,
     });
@@ -275,20 +270,15 @@ export const getUploadVideoUrl = async (
       ? `${cloudfrontDomain}/${s3Key}`
       : `https://${cloudfrontDomain}/${s3Key}`;
 
-    // console.log('✅ Generated URLs:', {
-    //   uploadUrl: uploadUrl.substring(0, 100) + '...',
-    //   videoUrl,
-    // });
-
     res.status(200).json({
       message: 'Upload URL generated successfully',
       data: { uploadUrl, videoUrl },
     });
   } catch (error) {
-    console.log('💥 Error generating upload URL:', error);
+    console.log('Error generating upload URL:', error);
     res.status(500).json({
       message: 'Error generating upload URL',
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };

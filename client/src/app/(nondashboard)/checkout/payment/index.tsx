@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import CoursePreview from '@/components/course/CoursePreview';
@@ -38,7 +39,11 @@ const PaymentPageContent = () => {
       return;
     }
 
-    // ✅ FIX: Use environment variable directly (simpler and more reliable)
+    if (!course) {
+      toast.error('Course information not available');
+      return;
+    }
+
     const baseUrl =
       process.env.NEXT_PUBLIC_STRIPE_REDIRECT_URL ||
       process.env.NEXT_PUBLIC_AMPLIFY_URL ||
@@ -50,7 +55,6 @@ const PaymentPageContent = () => {
       return;
     }
 
-    // ✅ FIX: Ensure proper URL format (remove any double protocols)
     const cleanBaseUrl = baseUrl.replace(/(https?:\/\/)+/, 'https://');
     console.log('clean base url:', cleanBaseUrl);
 
@@ -73,28 +77,33 @@ const PaymentPageContent = () => {
         return;
       }
 
-      // ✅ FIX: Check for successful payment
       if (result.paymentIntent?.status === 'succeeded') {
-        const transactionData: Partial<Transaction> = {
+        const transactionData = {
           transactionId: result.paymentIntent.id,
           userId: user.id,
           courseId: courseId,
-          paymentProvider: 'stripe',
-          amount: course?.price || 0,
+          paymentProvider: 'stripe' as const,
+          amount: course.price || 0,
+          dateTime: new Date().toISOString(),
         };
+
+        console.log('Creating transaction with data:', transactionData);
 
         try {
           await createTransaction(transactionData).unwrap();
-          toast.success('Payment successful!');
+          toast.success('Payment successful! Course enrolled.');
           navigateToStep(3);
-        } catch (transactionError) {
-          console.log('Transaction creation failed:', transactionError);
+        } catch (transactionError: any) {
+          console.error('Transaction creation failed:', transactionError);
+          const errorMessage =
+            transactionError?.data?.message || 'Enrollment failed';
           toast.error(
-            'Payment successful but enrollment failed. Contact support.'
+            `Payment successful but ${errorMessage}. Contact support.`
           );
-          // Still navigate to success since payment worked
           navigateToStep(3);
         }
+      } else {
+        toast.error('Payment not completed');
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -112,12 +121,10 @@ const PaymentPageContent = () => {
   return (
     <div className='payment'>
       <div className='payment__container'>
-        {/* Order Summary */}
         <div className='payment__preview'>
           <CoursePreview course={course} />
         </div>
 
-        {/* Payment Form */}
         <div className='payment__form-container'>
           <form
             id='payment-form'
@@ -148,7 +155,6 @@ const PaymentPageContent = () => {
         </div>
       </div>
 
-      {/* Navigation Buttons */}
       <div className='payment__actions'>
         <Button
           className='bg-white text-customgreys-dark-grey hover:bg-customgreys-dark-grey hover:text-white border-white-50 hover:border-customgreys-dark-grey'

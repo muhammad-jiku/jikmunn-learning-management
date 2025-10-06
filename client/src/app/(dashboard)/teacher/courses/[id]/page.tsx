@@ -105,10 +105,10 @@ const CourseEditor = () => {
         }),
       }));
 
-      // console.log(
-      //   '📋 Final validated sections to save:',
-      //   JSON.stringify(validatedSections, null, 2)
-      // );
+      console.log(
+        '📋 Final validated sections to save:',
+        JSON.stringify(validatedSections, null, 2)
+      );
 
       const formData = createCourseFormData(data, validatedSections);
 
@@ -127,13 +127,13 @@ const CourseEditor = () => {
     }
   };
 
-  // // Add this temporarily to your CourseEditor component
-  // useEffect(() => {
-  //   console.log(
-  //     '🔄 Current sections in state:',
-  //     JSON.stringify(sections, null, 2)
-  //   );
-  // }, [sections]);
+  // Add this temporarily to your CourseEditor component
+  useEffect(() => {
+    console.log(
+      '🔄 Current sections in state:',
+      JSON.stringify(sections, null, 2)
+    );
+  }, [sections]);
 
   return (
     <div className='bg-customgreys-secondarybg'>

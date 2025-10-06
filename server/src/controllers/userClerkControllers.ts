@@ -24,7 +24,7 @@ export const updateUser = async (
     console.log('Error updating user:', error);
     res.status(500).json({
       message: 'Error updating user',
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };

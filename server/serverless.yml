@@ -1,0 +1,41 @@
+service: jikmunn-learning-management
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-southeast-1
+  stage: ${opt:stage, 'prod'}
+  environment:
+    NODE_ENV: ${env:NODE_ENV}
+    CLERK_PUBLISHABLE_KEY: ${env:CLERK_PUBLISHABLE_KEY}
+    CLERK_SECRET_KEY: ${env:CLERK_SECRET_KEY}
+    AWS_ACCESS_KEY_ID: ${env:AWS_ACCESS_KEY_ID}
+    AWS_SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY}
+    AWS_REGION: ${env:AWS_REGION}
+    S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
+    CLOUDFRONT_DOMAIN: ${env:CLOUDFRONT_DOMAIN}
+    STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+
+package:
+  individually: false
+  patterns:
+    - '!node_modules/.cache/**'
+    - '!**/*.test.ts'
+    - '!**/*.spec.ts'
+    - '!**/__tests__/**'
+    - '!**/seed/**'
+
+functions:
+  api:
+    handler: dist/index.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+    timeout: 30
+    memorySize: 512

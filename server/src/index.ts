@@ -28,18 +28,6 @@ export const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
 });
 
-// // Remove current cors() line and replace with:
-// const corsOptions = {
-//   origin: [
-//     'http://localhost:3000',
-//     'https://main.dyzx1mm2ql9zq.amplifyapp.com',
-//     'https://jikmunn-learning-management.vercel.app',
-//   ],
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
-// };
-
 const app = express();
 app.use(express.json());
 app.use(helmet());
@@ -48,8 +36,6 @@ app.use(morgan('common'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
-// app.use(cors(corsOptions));
-// app.options('*', cors(corsOptions)); // Enable pre-flight for all routes
 app.use(clerkMiddleware());
 
 /* ROUTES */
@@ -62,6 +48,15 @@ app.use('/users/clerk', requireAuth(), userClerkRoutes);
 app.use('/transactions', requireAuth(), transactionRoutes);
 app.use('/users/course-progress', requireAuth(), userCourseProgressRoutes);
 
+/* ERROR HANDLING MIDDLEWARE */
+app.use((error: any, req: any, res: any, next: any) => {
+  console.error('Unhandled error:', error);
+  res.status(500).json({
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'production' ? undefined : error.message,
+  });
+});
+
 /* SERVER */
 const port = process.env.PORT;
 if (!isProduction) {
@@ -70,7 +65,7 @@ if (!isProduction) {
   });
 }
 
-// aws production environment
+// AWS production environment
 const serverlessApp = serverless(app);
 export const handler = async (event: any, context: any) => {
   if (event.action === 'seed') {

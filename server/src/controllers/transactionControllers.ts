@@ -9,7 +9,7 @@ dotenv.config();
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error(
-    'STRIPE_SECRET_KEY os required but was not found in env variables'
+    'STRIPE_SECRET_KEY is required but was not found in env variables'
   );
 }
 
@@ -34,7 +34,7 @@ export const listTransactions = async (
     console.log('Error fetching transactions:', error);
     res.status(500).json({
       message: 'Error retrieving transactions',
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };
@@ -60,7 +60,7 @@ export const createStripePaymentIntent = async (
     });
 
     res.status(200).json({
-      message: '',
+      message: 'Payment intent created successfully',
       data: {
         clientSecret: paymentIntent.client_secret,
       },
@@ -69,7 +69,7 @@ export const createStripePaymentIntent = async (
     console.log('Error creating stripe payment intent:', error);
     res.status(500).json({
       message: 'Error creating stripe payment intent',
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };
@@ -81,21 +81,34 @@ export const createTransaction = async (
   const { userId, courseId, transactionId, amount, paymentProvider } = req.body;
 
   try {
-    // 1. get course info
-    const course = await Course.get(courseId);
+    // Validate required fields
+    if (!userId || !courseId || !transactionId || !paymentProvider) {
+      res.status(400).json({
+        message:
+          'Missing required fields: userId, courseId, transactionId, paymentProvider',
+      });
+      return;
+    }
 
-    // 2. create transaction record
+    // 1. Get course info
+    const course = await Course.get(courseId);
+    if (!course) {
+      res.status(404).json({ message: 'Course not found' });
+      return;
+    }
+
+    // 2. Create transaction record
     const newTransaction = new Transaction({
-      dateTime: new Date().toISOString(),
       userId,
-      courseId,
       transactionId,
-      amount,
+      dateTime: new Date().toISOString(),
+      courseId,
+      amount: amount || 0,
       paymentProvider,
     });
     await newTransaction.save();
 
-    // 3. create initial course progress
+    // 3. Create initial course progress
     const initialProgress = new UserCourseProgress({
       userId,
       courseId,
@@ -112,18 +125,26 @@ export const createTransaction = async (
     });
     await initialProgress.save();
 
-    // 4. add enrollment to relevant course
-    await Course.update(
-      { courseId },
-      {
-        $ADD: {
-          enrollments: [{ userId }],
-        },
-      }
+    // 4. Add enrollment to course
+    if (!course.enrollments) {
+      course.enrollments = [];
+    }
+
+    // Check if user is already enrolled
+    const isAlreadyEnrolled = course.enrollments.some(
+      (enrollment: any) => enrollment.userId === userId
     );
 
+    if (!isAlreadyEnrolled) {
+      course.enrollments.push({
+        userId,
+        enrolledAt: new Date().toISOString(),
+      });
+      await course.save();
+    }
+
     res.status(201).json({
-      message: 'Purchased Course successfully',
+      message: 'Course purchased successfully',
       data: {
         transaction: newTransaction,
         courseProgress: initialProgress,
@@ -133,7 +154,7 @@ export const createTransaction = async (
     console.log('Error creating transaction and enrollment:', error);
     res.status(500).json({
       message: 'Error creating transaction and enrollment',
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };

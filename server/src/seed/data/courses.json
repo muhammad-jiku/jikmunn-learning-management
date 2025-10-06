@@ -11,8 +11,14 @@
     "level": "Beginner",
     "status": "Published",
     "enrollments": [
-      { "userId": "user_2ntu96pUCljUV2T9W0AThzjacQB" },
-      { "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy" }
+      {
+        "userId": "user_2ntu96pUCljUV2T9W0AThzjacQB",
+        "enrolledAt": "2024-03-01T10:30:00Z"
+      },
+      {
+        "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy",
+        "enrolledAt": "2024-03-25T08:15:00Z"
+      }
     ],
     "sections": [
       {
@@ -123,8 +129,14 @@
     "level": "Advanced",
     "status": "Published",
     "enrollments": [
-      { "userId": "user_2ntu96pUCljUV2T9W0AThzjacQB" },
-      { "userId": "user_5vBn23WsLkMp7Jh4Gt8FxYcRz" }
+      {
+        "userId": "user_2ntu96pUCljUV2T9W0AThzjacQB",
+        "enrolledAt": "2024-07-06T10:30:00Z"
+      },
+      {
+        "userId": "user_5vBn23WsLkMp7Jh4Gt8FxYcRz",
+        "enrolledAt": "2024-10-05T08:15:00Z"
+      }
     ],
     "sections": [
       {
@@ -237,8 +249,14 @@
     "level": "Beginner",
     "status": "Published",
     "enrollments": [
-      { "userId": "user_6tHm89QwNpKj3Fx5Vy2RdLcBs" },
-      { "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy" }
+      {
+        "userId": "user_6tHm89QwNpKj3Fx5Vy2RdLcBs",
+        "enrolledAt": "2024-04-10T10:30:00Z"
+      },
+      {
+        "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy",
+        "enrolledAt": "2024-01-09T08:15:00Z"
+      }
     ],
     "sections": [
       {
@@ -313,8 +331,14 @@
     "level": "Intermediate",
     "status": "Published",
     "enrollments": [
-      { "userId": "user_6tHm89QwNpKj3Fx5Vy2RdLcBs" },
-      { "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy" }
+      {
+        "userId": "user_6tHm89QwNpKj3Fx5Vy2RdLcBs",
+        "enrolledAt": "2024-12-12T10:30:00Z"
+      },
+      {
+        "userId": "user_9xWp45MnKjL8vRt2Hs6BqDcEy",
+        "enrolledAt": "2024-09-01T08:15:00Z"
+      }
     ],
     "sections": [
       {
@@ -352,7 +376,12 @@
     "price": 12999,
     "level": "Advanced",
     "status": "Published",
-    "enrollments": [{ "userId": "user_6tHm89QwNpKj3Fx5Vy2RdLcBs" }],
+    "enrollments": [
+      {
+        "userId": "user_6tHm89QwNpKj3Fx5Vy2RdLcBs",
+        "enrolledAt": "2024-04-19T10:30:00Z"
+      }
+    ],
     "sections": [
       {
         "sectionId": "5k7l9m1n-3o5p-7q9r-1s3t-5u7v9w1x3y5z",
@@ -379,4 +408,3 @@
     ]
   }
 ]
-

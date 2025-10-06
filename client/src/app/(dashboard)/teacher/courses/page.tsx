@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import TeacherCourseCard from '@/components/course/TeacherCourseCard';
@@ -41,7 +42,6 @@ const Courses = () => {
         .includes(searchTerm.toLowerCase());
       const matchesCategory =
         selectedCategory === 'all' || course.category === selectedCategory;
-      // Only show courses owned by the current teacher
       return matchesSearch && matchesCategory && course.teacherId === user?.id;
     });
   }, [courses, searchTerm, selectedCategory, user?.id]);
@@ -57,9 +57,10 @@ const Courses = () => {
       try {
         await deleteCourse(course.courseId).unwrap();
         toast.success('Course deleted successfully');
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to delete course:', error);
-        toast.error('Failed to delete course');
+        const errorMessage = error?.data?.message || 'Failed to delete course';
+        toast.error(errorMessage);
       }
     }
   };
@@ -70,35 +71,25 @@ const Courses = () => {
       return;
     }
 
-    // ✅ FIX: Ensure we have required user data
-    if (!user.id) {
-      toast.error('User ID is missing');
-      return;
-    }
-
-    const teacherName =
-      user.fullName ||
-      `${user.firstName} ${user.lastName || ''}`.trim() ||
-      'Unknown Teacher';
-
-    console.log('Creating course with:', {
-      teacherId: user.id,
-      teacherName,
-    });
+    console.log('Creating course with authenticated user:', user.id);
 
     try {
-      const result = await createCourse({
-        teacherId: user.id,
-        teacherName: teacherName,
-      }).unwrap();
+      // Send empty object since backend gets teacher info from auth
+      const result = await createCourse().unwrap();
+      // const result = await createCourse( {} ).unwrap();
+      // const result = await createCourse({
+      //   teacherId: '',
+      //   teacherName: '',
+      // }).unwrap();
 
       toast.success('Course created successfully!');
       router.push(`/teacher/courses/${result.courseId}`, {
         scroll: false,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create course:', error);
-      toast.error('Failed to create course. Please try again.');
+      const errorMessage = error?.data?.message || 'Failed to create course';
+      toast.error(errorMessage);
     }
   };
 

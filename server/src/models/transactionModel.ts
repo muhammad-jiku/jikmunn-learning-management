@@ -29,7 +29,10 @@ const transactionSchema = new Schema(
       enum: ['stripe'],
       required: true,
     },
-    amount: Number,
+    amount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     saveUnknown: true,

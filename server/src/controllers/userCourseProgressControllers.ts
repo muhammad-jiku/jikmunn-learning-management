@@ -23,6 +23,15 @@ export const getUserEnrolledCourses = async (
 
     const courseIds = enrolledCourses.map((item: any) => item.courseId);
 
+    // Fix: Check if courseIds array is empty
+    if (courseIds.length === 0) {
+      res.status(200).json({
+        message: 'Enrolled courses retrieved successfully',
+        data: [],
+      });
+      return;
+    }
+
     const courses = await Course.batchGet(courseIds);
 
     res.status(200).json({
@@ -33,7 +42,7 @@ export const getUserEnrolledCourses = async (
     console.log('Error fetching enrolled courses:', error);
     res.status(500).json({
       message: 'Error retrieving enrolled courses',
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };
@@ -43,12 +52,6 @@ export const getUserCourseProgress = async (
   res: Response
 ): Promise<void> => {
   const { userId, courseId } = req.params;
-  // console.log(
-  //   'Fetching course progress for user ID:',
-  //   userId,
-  //   'and course ID:',
-  //   courseId
-  // );
 
   try {
     const progress = await UserCourseProgress.get({ userId, courseId });
@@ -58,7 +61,6 @@ export const getUserCourseProgress = async (
         .json({ message: 'Course progress not found for this user' });
       return;
     }
-    // console.log('Course progress details:', progress);
 
     res.status(200).json({
       message: 'Course progress retrieved successfully',
@@ -66,9 +68,10 @@ export const getUserCourseProgress = async (
     });
   } catch (error) {
     console.log('Error fetching course progress:', error);
-    res
-      .status(500)
-      .json({ message: 'Error retrieving user course progress', error });
+    res.status(500).json({
+      message: 'Error retrieving user course progress',
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    });
   }
 };
 
@@ -79,26 +82,29 @@ export const updateUserCourseProgress = async (
   const { userId, courseId } = req.params;
   const progressData = req.body;
 
-  // console.log(
-  //   'Updating course progress for user ID:',
-  //   userId,
-  //   'and course ID:',
-  //   courseId
-  // );
-  // console.log('Progress data received:', progressData);
-
   try {
     let progress = await UserCourseProgress.get({ userId, courseId });
-    // console.log('Existing progress:', progress);
 
     if (!progress) {
       // If no progress exists, create initial progress
+      const course = await Course.get(courseId);
+      if (!course) {
+        res.status(404).json({ message: 'Course not found' });
+        return;
+      }
+
       progress = new UserCourseProgress({
         userId,
         courseId,
         enrollmentDate: new Date().toISOString(),
         overallProgress: 0,
-        sections: progressData.sections || [],
+        sections: course.sections.map((section: any) => ({
+          sectionId: section.sectionId,
+          chapters: section.chapters.map((chapter: any) => ({
+            chapterId: chapter.chapterId,
+            completed: false,
+          })),
+        })),
         lastAccessedTimestamp: new Date().toISOString(),
       });
     } else {
@@ -112,7 +118,6 @@ export const updateUserCourseProgress = async (
     }
 
     await progress.save();
-    // console.log('Updated progress:', progress);
 
     res.status(200).json({
       message: 'User course progress updated successfully!',
@@ -122,7 +127,7 @@ export const updateUserCourseProgress = async (
     console.log('Error updating progress:', error);
     res.status(500).json({
       message: 'Error updating user course progress',
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };
