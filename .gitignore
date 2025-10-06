@@ -11,6 +11,8 @@ server/.env.prod
 
 client/.next/
 
+server/.serverless
+
 .DS_Store
 Thumbs.db
 
