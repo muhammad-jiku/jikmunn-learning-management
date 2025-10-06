@@ -5,20 +5,14 @@ provider:
   runtime: nodejs18.x
   region: ap-southeast-1
   stage: ${opt:stage, 'prod'}
-  environment:
-    NODE_ENV: ${env:NODE_ENV}
-    CLERK_PUBLISHABLE_KEY: ${env:CLERK_PUBLISHABLE_KEY}
-    CLERK_SECRET_KEY: ${env:CLERK_SECRET_KEY}
-    AWS_ACCESS_KEY_ID: ${env:AWS_ACCESS_KEY_ID}
-    AWS_SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY}
-    AWS_REGION: ${env:AWS_REGION}
-    S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
-    CLOUDFRONT_DOMAIN: ${env:CLOUDFRONT_DOMAIN}
-    STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
+  profile: default # Use the default AWS profile
 
 plugins:
   - serverless-dotenv-plugin
-  - serverless-offline
+
+custom:
+  dotenv:
+    path: .env.${opt:stage, 'prod'}
 
 package:
   individually: false
@@ -33,9 +27,15 @@ functions:
   api:
     handler: dist/index.handler
     events:
-      - http:
-          path: /{proxy+}
-          method: any
-          cors: true
+      - path: /{proxy+}
+        method: any
+        cors: true
     timeout: 30
     memorySize: 512
+    environment:
+      NODE_ENV: ${env:NODE_ENV}
+      CLERK_PUBLISHABLE_KEY: ${env:CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${env:CLERK_SECRET_KEY}
+      S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
+      CLOUDFRONT_DOMAIN: ${env:CLOUDFRONT_DOMAIN}
+      STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY}
