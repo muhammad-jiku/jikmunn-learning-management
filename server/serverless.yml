@@ -4,15 +4,16 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: ap-southeast-1
-  stage: ${opt:stage, 'prod'}
+  stage: prod
   profile: default
 
-plugins:
-  - serverless-dotenv-plugin
-
-custom:
-  dotenv:
-    path: .env.${opt:stage, 'prod'}
+# Add this to use existing function
+resources:
+  Resources:
+    ApiLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        FunctionName: jikmunnLearningManagementLambda
 
 package:
   individually: false
@@ -25,6 +26,7 @@ package:
 
 functions:
   api:
+    name: jikmunnLearningManagementLambda # Use existing function name
     handler: dist/index.handler
     events:
       - http:
