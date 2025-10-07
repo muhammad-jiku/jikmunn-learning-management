@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from 'clsx';
 import { toast } from 'sonner';
@@ -323,7 +324,7 @@ export const uploadAllVideos = async (
   courseId: string,
   getUploadVideoUrl: any
 ) => {
-  console.log('🚀 STARTING uploadAllVideos - Course ID:', courseId);
+  // console.log('🚀 STARTING uploadAllVideos - Course ID:', courseId);
 
   // Create a deep copy to avoid mutating Redux state
   const updatedSections = localSections.map((section) => ({
@@ -339,16 +340,16 @@ export const uploadAllVideos = async (
     for (let j = 0; j < section.chapters.length; j++) {
       const chapter = section.chapters[j];
 
-      console.log(`🔍 Checking chapter: ${chapter.title}`, {
-        videoType: typeof chapter.video,
-        videoValue: chapter.video,
-        currentType: chapter.type,
-      });
+      // console.log(`🔍 Checking chapter: ${chapter.title}`, {
+      //   videoType: typeof chapter.video,
+      //   videoValue: chapter.video,
+      //   currentType: chapter.type,
+      // });
 
       // Only process if video is a File and type should be Video
       if (chapter.video instanceof File) {
         hasVideoFiles = true;
-        console.log('🎬 Found video file to upload:', chapter.video.name);
+        // console.log('🎬 Found video file to upload:', chapter.video.name);
 
         try {
           const updatedChapter = await uploadVideo(
@@ -358,12 +359,12 @@ export const uploadAllVideos = async (
             getUploadVideoUrl
           );
 
-          console.log('✅ Video uploaded, updating chapter:', {
-            oldVideo: chapter.video,
-            newVideo: updatedChapter.video,
-            oldType: chapter.type,
-            newType: updatedChapter.type,
-          });
+          // console.log('✅ Video uploaded, updating chapter:', {
+          //   oldVideo: chapter.video,
+          //   newVideo: updatedChapter.video,
+          //   oldType: chapter.type,
+          //   newType: updatedChapter.type,
+          // });
 
           // Create a new chapters array with the updated chapter
           updatedSections[i] = {
@@ -373,10 +374,10 @@ export const uploadAllVideos = async (
             ),
           };
         } catch (error) {
-          console.log(
-            '❌ Video upload failed, keeping chapter as Text:',
-            error
-          );
+          // console.log(
+          //   '❌ Video upload failed, keeping chapter as Text:',
+          //   error
+          // );
           // Create a new chapters array with the failed chapter
           updatedSections[i] = {
             ...updatedSections[i],
@@ -392,10 +393,10 @@ export const uploadAllVideos = async (
           };
         }
       } else if (chapter.type === 'Video' && !chapter.video) {
-        // If chapter is marked as Video but has no video URL, revert to Text
-        console.log(
-          '⚠️ Chapter marked as Video but has no video, reverting to Text'
-        );
+        //  // If chapter is marked as Video but has no video URL, revert to Text
+        // console.log(
+        //   '⚠️ Chapter marked as Video but has no video, reverting to Text'
+        // );
         updatedSections[i] = {
           ...updatedSections[i],
           chapters: updatedSections[i].chapters.map((chap, index) =>
@@ -413,10 +414,10 @@ export const uploadAllVideos = async (
   }
 
   if (!hasVideoFiles) {
-    console.log('ℹ️ No video files found to upload');
+    // console.log('ℹ️ No video files found to upload');
   }
 
-  console.log('🏁 FINAL sections:', JSON.stringify(updatedSections, null, 2));
+  // console.log('🏁 FINAL sections:', JSON.stringify(updatedSections, null, 2));
   return updatedSections;
 };
 
@@ -428,14 +429,14 @@ const uploadVideo = async (
 ) => {
   const file = chapter.video as File;
 
-  console.log('🎬 STARTING uploadVideo:', {
-    chapterId: chapter.chapterId,
-    courseId,
-    sectionId,
-    fileName: file.name,
-    fileSize: file.size,
-    fileType: file.type,
-  });
+  // console.log('🎬 STARTING uploadVideo:', {
+  //   chapterId: chapter.chapterId,
+  //   courseId,
+  //   sectionId,
+  //   fileName: file.name,
+  //   fileSize: file.size,
+  //   fileType: file.type,
+  // });
 
   try {
     const sanitizedFileName = sanitizeFilename(file.name);
@@ -450,7 +451,7 @@ const uploadVideo = async (
     }
 
     // Get upload URL with all required parameters
-    console.log('🔄 Getting upload URL...');
+    // console.log('🔄 Getting upload URL...');
     const { uploadUrl, videoUrl } = await getUploadVideoUrl({
       courseId: courseId,
       sectionId: sectionId,
@@ -460,11 +461,11 @@ const uploadVideo = async (
       fileSize: file.size, // Add file size
     }).unwrap();
 
-    console.log('📤 Upload URL received:', uploadUrl.substring(0, 100) + '...');
-    console.log('📺 Video URL that will be saved:', videoUrl);
+    // console.log('📤 Upload URL received:', uploadUrl.substring(0, 100) + '...');
+    // console.log('📺 Video URL that will be saved:', videoUrl);
 
     // Upload the file
-    console.log('⬆️  Starting file upload...');
+    // console.log('⬆️  Starting file upload...');
     const response = await fetch(uploadUrl, {
       method: 'PUT',
       headers: {
@@ -473,18 +474,18 @@ const uploadVideo = async (
       body: file,
     });
 
-    console.log('📨 Upload response status:', response.status);
+    // console.log('📨 Upload response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.log('❌ Upload failed with response:', errorText);
+      // console.log('❌ Upload failed with response:', errorText);
       throw new Error(
         `Upload failed with status ${response.status}: ${errorText}`
       );
     }
 
-    console.log('✅ Upload successful!');
-    console.log('💾 Returning chapter with video URL:', videoUrl);
+    // console.log('✅ Upload successful!');
+    // console.log('💾 Returning chapter with video URL:', videoUrl);
 
     toast.success(`Video uploaded successfully for chapter ${chapter.title}`);
 
@@ -494,7 +495,7 @@ const uploadVideo = async (
       type: 'Video' as const,
     };
   } catch (error) {
-    console.log('💥 Upload video error:', error);
+    // console.log('💥 Upload video error:', error);
     toast.error(
       `Failed to upload video: ${
         error instanceof Error ? error.message : 'Unknown error'

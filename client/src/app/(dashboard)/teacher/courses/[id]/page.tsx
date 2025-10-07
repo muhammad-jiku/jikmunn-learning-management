@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { CustomFormField } from '@/components/custom/CustomFormField';
@@ -73,19 +74,19 @@ const CourseEditor = () => {
       let updatedSections = sections;
 
       try {
-        console.log('📤 Starting video uploads...');
+        // console.log('📤 Starting video uploads...');
         const uploadResult = await uploadAllVideos(
           sections,
           id,
           getUploadVideoUrl
         );
-        console.log('✅ Video uploads completed');
+        // console.log('✅ Video uploads completed');
 
         // Update global state with the new sections containing video URLs
         dispatch(setSections(uploadResult));
         updatedSections = uploadResult; // Use the uploaded result
       } catch (uploadError) {
-        console.log('❌ Video upload failed:', uploadError);
+        // console.log('❌ Video upload failed:', uploadError);
         // Keep original sections if upload fails
         updatedSections = sections;
       }
@@ -107,35 +108,35 @@ const CourseEditor = () => {
         }),
       }));
 
-      console.log(
-        '📋 Final validated sections to save:',
-        JSON.stringify(validatedSections, null, 2)
-      );
+      // console.log(
+      //   '📋 Final validated sections to save:',
+      //   JSON.stringify(validatedSections, null, 2)
+      // );
 
       const formData = createCourseFormData(data, validatedSections);
 
-      console.log('📨 Sending course update to server...');
+      // console.log('📨 Sending course update to server...');
       const result = await updateCourse({
         courseId: id,
         formData,
       }).unwrap();
 
-      console.log('✅ Course update successful!', result);
+      // console.log('✅ Course update successful!', result);
       toast.success('Course updated successfully');
       refetch();
     } catch (error) {
-      console.log('💥 Course update failed:', error);
+      // console.log('💥 Course update failed:', error);
       toast.error('Failed to update course');
     }
   };
 
-  // Add this temporarily to your CourseEditor component
-  useEffect(() => {
-    console.log(
-      '🔄 Current sections in state:',
-      JSON.stringify(sections, null, 2)
-    );
-  }, [sections]);
+  // // Add this temporarily to your CourseEditor component
+  // useEffect(() => {
+  //   console.log(
+  //     '🔄 Current sections in state:',
+  //     JSON.stringify(sections, null, 2)
+  //   );
+  // }, [sections]);
 
   return (
     <div className='bg-customgreys-secondarybg'>

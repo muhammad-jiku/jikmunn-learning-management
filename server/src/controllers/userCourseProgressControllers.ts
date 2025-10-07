@@ -75,63 +75,6 @@ export const getUserCourseProgress = async (
   }
 };
 
-// export const updateUserCourseProgress = async (
-//   req: Request,
-//   res: Response
-// ): Promise<void> => {
-//   const { userId, courseId } = req.params;
-//   const progressData = req.body;
-
-//   try {
-//     let progress = await UserCourseProgress.get({ userId, courseId });
-
-//     if (!progress) {
-//       // If no progress exists, create initial progress
-//       const course = await Course.get(courseId);
-//       if (!course) {
-//         res.status(404).json({ message: 'Course not found' });
-//         return;
-//       }
-
-//       progress = new UserCourseProgress({
-//         userId,
-//         courseId,
-//         enrollmentDate: new Date().toISOString(),
-//         overallProgress: 0,
-//         sections: course.sections.map((section: any) => ({
-//           sectionId: section.sectionId,
-//           chapters: section.chapters.map((chapter: any) => ({
-//             chapterId: chapter.chapterId,
-//             completed: false,
-//           })),
-//         })),
-//         lastAccessedTimestamp: new Date().toISOString(),
-//       });
-//     } else {
-//       // Merge existing progress with new progress data
-//       progress.sections = mergeSections(
-//         progress.sections,
-//         progressData.sections || []
-//       );
-//       progress.lastAccessedTimestamp = new Date().toISOString();
-//       progress.overallProgress = calculateOverallProgress(progress.sections);
-//     }
-
-//     await progress.save();
-
-//     res.status(200).json({
-//       message: 'User course progress updated successfully!',
-//       data: progress,
-//     });
-//   } catch (error) {
-//     console.log('Error updating progress:', error);
-//     res.status(500).json({
-//       message: 'Error updating user course progress',
-//       error: error instanceof Error ? error.message : 'Unknown error occurred',
-//     });
-//   }
-// };
-
 export const updateUserCourseProgress = async (
   req: Request,
   res: Response

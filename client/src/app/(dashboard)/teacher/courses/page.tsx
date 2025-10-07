@@ -19,7 +19,6 @@ import { toast } from 'sonner';
 const Courses = () => {
   const router = useRouter();
   const { user, isLoaded } = useUser();
-  console.log('user information:', user);
 
   const {
     data: courses,
@@ -71,7 +70,7 @@ const Courses = () => {
       return;
     }
 
-    console.log('Creating course with authenticated user:', user.id);
+    // console.log('Creating course with authenticated user:', user.id);
 
     try {
       // Send empty object since backend gets teacher info from auth

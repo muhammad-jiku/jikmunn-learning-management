@@ -74,91 +74,6 @@ export const createStripePaymentIntent = async (
   }
 };
 
-// export const createTransaction = async (
-//   req: Request,
-//   res: Response
-// ): Promise<void> => {
-//   const { userId, courseId, transactionId, amount, paymentProvider } = req.body;
-
-//   try {
-//     // Validate required fields
-//     if (!userId || !courseId || !transactionId || !paymentProvider) {
-//       res.status(400).json({
-//         message:
-//           'Missing required fields: userId, courseId, transactionId, paymentProvider',
-//       });
-//       return;
-//     }
-
-//     // 1. Get course info
-//     const course = await Course.get(courseId);
-//     if (!course) {
-//       res.status(404).json({ message: 'Course not found' });
-//       return;
-//     }
-
-//     // 2. Create transaction record
-//     const newTransaction = new Transaction({
-//       userId,
-//       transactionId,
-//       dateTime: new Date().toISOString(),
-//       courseId,
-//       amount: amount || 0,
-//       paymentProvider,
-//     });
-//     await newTransaction.save();
-
-//     // 3. Create initial course progress
-//     const initialProgress = new UserCourseProgress({
-//       userId,
-//       courseId,
-//       enrollmentDate: new Date().toISOString(),
-//       overallProgress: 0,
-//       sections: course.sections.map((section: any) => ({
-//         sectionId: section.sectionId,
-//         chapters: section.chapters.map((chapter: any) => ({
-//           chapterId: chapter.chapterId,
-//           completed: false,
-//         })),
-//       })),
-//       lastAccessedTimestamp: new Date().toISOString(),
-//     });
-//     await initialProgress.save();
-
-//     // 4. Add enrollment to course
-//     if (!course.enrollments) {
-//       course.enrollments = [];
-//     }
-
-//     // Check if user is already enrolled
-//     const isAlreadyEnrolled = course.enrollments.some(
-//       (enrollment: any) => enrollment.userId === userId
-//     );
-
-//     if (!isAlreadyEnrolled) {
-//       course.enrollments.push({
-//         userId,
-//         enrolledAt: new Date().toISOString(),
-//       });
-//       await course.save();
-//     }
-
-//     res.status(201).json({
-//       message: 'Course purchased successfully',
-//       data: {
-//         transaction: newTransaction,
-//         courseProgress: initialProgress,
-//       },
-//     });
-//   } catch (error) {
-//     console.log('Error creating transaction and enrollment:', error);
-//     res.status(500).json({
-//       message: 'Error creating transaction and enrollment',
-//       error: error instanceof Error ? error.message : 'Unknown error occurred',
-//     });
-//   }
-// };
-
 export const createTransaction = async (
   req: Request,
   res: Response
@@ -168,10 +83,10 @@ export const createTransaction = async (
   if (Buffer.isBuffer(req.body)) {
     try {
       requestBody = JSON.parse(req.body.toString());
-      console.log(
-        '✅ Parsed transaction body from Buffer to JSON:',
-        requestBody
-      );
+      // console.log(
+      //   '✅ Parsed transaction body from Buffer to JSON:',
+      //   requestBody
+      // );
     } catch (parseError) {
       console.log('❌ Error parsing transaction Buffer to JSON:', parseError);
       res.status(400).json({
@@ -185,7 +100,7 @@ export const createTransaction = async (
   const { userId, courseId, transactionId, amount, paymentProvider } =
     requestBody;
 
-  console.log('🔍 Transaction creation request:', requestBody);
+  // console.log('🔍 Transaction creation request:', requestBody);
 
   try {
     // Validate required fields

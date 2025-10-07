@@ -56,10 +56,10 @@ const PaymentPageContent = () => {
     }
 
     const cleanBaseUrl = baseUrl.replace(/(https?:\/\/)+/, 'https://');
-    console.log('clean base url:', cleanBaseUrl);
+    // console.log('clean base url:', cleanBaseUrl);
 
     const returnUrl = `${cleanBaseUrl}/checkout?step=3&id=${courseId}`;
-    console.log('Using return URL:', returnUrl);
+    // console.log('Using return URL:', returnUrl);
 
     try {
       const result = await stripe.confirmPayment({
@@ -70,7 +70,7 @@ const PaymentPageContent = () => {
         redirect: 'if_required',
       });
 
-      console.log('Payment result:', result);
+      // console.log('Payment result:', result);
 
       if (result.error) {
         toast.error(`Payment failed: ${result.error.message}`);
@@ -87,7 +87,7 @@ const PaymentPageContent = () => {
           dateTime: new Date().toISOString(),
         };
 
-        console.log('Creating transaction with data:', transactionData);
+        // console.log('Creating transaction with data:', transactionData);
 
         try {
           await createTransaction(transactionData).unwrap();

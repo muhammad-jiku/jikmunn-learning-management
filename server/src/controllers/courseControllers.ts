@@ -227,7 +227,7 @@ export const getUploadVideoUrl = async (
   if (Buffer.isBuffer(body)) {
     try {
       body = JSON.parse(body.toString());
-      console.log('✅ Parsed body from Buffer to JSON:', body);
+      // console.log('✅ Parsed body from Buffer to JSON:', body);
     } catch (parseError) {
       console.log('❌ Error parsing Buffer to JSON:', parseError);
       res.status(400).json({
@@ -244,12 +244,12 @@ export const getUploadVideoUrl = async (
   // Extract from request body (now properly parsed)
   const { fileName, fileType, fileSize } = body;
 
-  // ✅ FIX: Better logging with all data
-  console.log('🔍 Upload URL Request:', {
-    params: req.params,
-    body: body,
-    extracted: { courseId, sectionId, chapterId, fileName, fileType, fileSize },
-  });
+  // // ✅ FIX: Better logging with all data
+  // console.log('🔍 Upload URL Request:', {
+  //   params: req.params,
+  //   body: body,
+  //   extracted: { courseId, sectionId, chapterId, fileName, fileType, fileSize },
+  // });
 
   // ✅ FIX: Improved validation with specific error messages
   const missingFields = [];
@@ -323,7 +323,7 @@ export const getUploadVideoUrl = async (
     const uniqueId = uuidv4();
     const s3Key = `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/${uniqueId}-${sanitizedFileName}`;
 
-    console.log('🗂️ Generated S3 key:', s3Key);
+    // console.log('🗂️ Generated S3 key:', s3Key);
 
     const command = new PutObjectCommand({
       Bucket: bucketName,
@@ -346,10 +346,10 @@ export const getUploadVideoUrl = async (
       ? `${cloudfrontDomain}/${s3Key}`
       : `https://${cloudfrontDomain}/${s3Key}`;
 
-    console.log('✅ Generated URLs:', {
-      uploadUrl: uploadUrl.substring(0, 100) + '...',
-      videoUrl,
-    });
+    // console.log('✅ Generated URLs:', {
+    //   uploadUrl: uploadUrl.substring(0, 100) + '...',
+    //   videoUrl,
+    // });
 
     res.status(200).json({
       message: 'Upload URL generated successfully',

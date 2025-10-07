@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -50,7 +51,7 @@ const SharedNotificationSettings = ({
     try {
       await updateUser(updatedUser);
     } catch (error) {
-      console.log('Failed to update user settings: ', error);
+      // console.log('Failed to update user settings: ', error);
     }
   };
 

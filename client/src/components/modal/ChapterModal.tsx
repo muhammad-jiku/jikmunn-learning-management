@@ -66,15 +66,15 @@ const ChapterModal = () => {
   const onSubmit = (data: ChapterFormData) => {
     if (selectedSectionIndex === null) return;
 
-    console.log('📝 Submitted data:', data);
-    console.log('📁 File details:', {
-      hasVideo: !!data.video,
-      videoType: typeof data.video,
-      videoIsFile: data.video instanceof File,
-      videoName: data.video instanceof File ? data.video.name : 'N/A',
-      videoTypeProp: data.video instanceof File ? data.video.type : 'N/A',
-      videoSize: data.video instanceof File ? data.video.size : 'N/A',
-    });
+    // console.log('📝 Submitted data:', data);
+    // console.log('📁 File details:', {
+    //   hasVideo: !!data.video,
+    //   videoType: typeof data.video,
+    //   videoIsFile: data.video instanceof File,
+    //   videoName: data.video instanceof File ? data.video.name : 'N/A',
+    //   videoTypeProp: data.video instanceof File ? data.video.type : 'N/A',
+    //   videoSize: data.video instanceof File ? data.video.size : 'N/A',
+    // });
 
     // Determine the type based on whether video is provided
     const hasVideo =
@@ -91,13 +91,13 @@ const ChapterModal = () => {
       video: data.video || '',
     };
 
-    console.log('📝 Creating/Updating chapter:', {
-      chapterId: newChapter.chapterId,
-      title: newChapter.title,
-      type: newChapter.type,
-      video: newChapter.video,
-      hasVideo: hasVideo,
-    });
+    // console.log('📝 Creating/Updating chapter:', {
+    //   chapterId: newChapter.chapterId,
+    //   title: newChapter.title,
+    //   type: newChapter.type,
+    //   video: newChapter.video,
+    //   hasVideo: hasVideo,
+    // });
 
     if (selectedChapterIndex === null) {
       dispatch(
@@ -147,54 +147,6 @@ const ChapterModal = () => {
               type='textarea'
               placeholder='Write chapter content here'
             />
-            {/* <FormField
-              control={methods.control}
-              name='video'
-              render={({ field: { onChange, value } }) => (
-                <FormItem>
-                  <FormLabel className='text-customgreys-dirty-grey text-sm'>
-                    Chapter Video
-                  </FormLabel>
-                  <FormControl>
-                    <div>
-                      <Input
-                        type='file'
-                        accept='video/mp4,video/webm,video/ogg'
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            // Validate file size (e.g., 500MB limit)
-                            if (file.size > 500 * 1024 * 1024) {
-                              toast.error('Video file must be less than 500MB');
-                              return;
-                            }
-                            // Validate file type
-                            if (!file.type.startsWith('video/')) {
-                              toast.error('Please select a valid video file');
-                              return;
-                            }
-                            onChange(file);
-                          }
-                        }}
-                        className='border-none bg-customgreys-dark-grey py-2 cursor-pointer'
-                      />
-                      {typeof value === 'string' && value && (
-                        <div className='my-2 text-sm text-gray-600'>
-                          Current video: {value.split('/').pop()}
-                        </div>
-                      )}
-                      {value instanceof File && (
-                        <div className='my-2 text-sm text-white-100'>
-                          Selected: {value.name} (
-                          {(value.size / (1024 * 1024)).toFixed(2)} MB)
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage className='text-red-400' />
-                </FormItem>
-              )}
-            /> */}
 
             <FormField
               control={methods.control}
@@ -226,11 +178,11 @@ const ChapterModal = () => {
                               return;
                             }
 
-                            console.log('📁 File selected:', {
-                              name: file.name,
-                              type: file.type,
-                              size: file.size,
-                            });
+                            // console.log('📁 File selected:', {
+                            //   name: file.name,
+                            //   type: file.type,
+                            //   size: file.size,
+                            // });
 
                             onChange(file);
                           }
