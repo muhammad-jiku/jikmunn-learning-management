@@ -217,38 +217,29 @@ export const getUploadVideoUrl = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const {
-    courseId: paramCourseId,
-    sectionId: paramSectionId,
-    chapterId: paramChapterId,
-  } = req.params;
-  const {
-    fileName,
-    fileType,
-    courseId: bodyCourseId,
-    sectionId: bodySectionId,
-    chapterId: bodyChapterId,
-  } = req.body;
+  // Extract from URL parameters (these should always be present)
+  const { courseId, sectionId, chapterId } = req.params;
 
-  const courseId = paramCourseId || bodyCourseId;
-  const sectionId = paramSectionId || bodySectionId;
-  const chapterId = paramChapterId || bodyChapterId;
+  // Extract from request body
+  const { fileName, fileType, fileSize } = req.body;
 
-  // ✅ FIX: Better error logging
+  // ✅ FIX: Better logging with all data
   console.log('🔍 Upload URL Request:', {
     params: req.params,
     body: req.body,
-    resolved: { courseId, sectionId, chapterId, fileName, fileType },
+    extracted: { courseId, sectionId, chapterId, fileName, fileType, fileSize },
   });
 
-  if (!fileName || !fileType || !courseId || !sectionId || !chapterId) {
-    console.log('❌ Missing required fields:', {
-      fileName: !!fileName,
-      fileType: !!fileType,
-      courseId: !!courseId,
-      sectionId: !!sectionId,
-      chapterId: !!chapterId,
-    });
+  // ✅ FIX: Improved validation with specific error messages
+  const missingFields = [];
+  if (!fileName) missingFields.push('fileName');
+  if (!fileType) missingFields.push('fileType');
+  if (!courseId) missingFields.push('courseId');
+  if (!sectionId) missingFields.push('sectionId');
+  if (!chapterId) missingFields.push('chapterId');
+
+  if (missingFields.length > 0) {
+    console.log('❌ Missing required fields:', missingFields);
 
     res.status(400).json({
       message: 'All fields are required',
@@ -260,30 +251,52 @@ export const getUploadVideoUrl = async (
         chapterId: chapterId || 'undefined',
       },
       required: ['fileName', 'fileType', 'courseId', 'sectionId', 'chapterId'],
+      missing: missingFields,
+    });
+    return;
+  }
+
+  // ✅ FIX: Validate file type
+  if (!fileType.startsWith('video/')) {
+    res.status(400).json({
+      message: 'Invalid file type. Only video files are allowed.',
+      received: fileType,
+    });
+    return;
+  }
+
+  // ✅ FIX: Validate file size (optional - 500MB limit)
+  const maxSize = 500 * 1024 * 1024; // 500MB
+  if (fileSize && fileSize > maxSize) {
+    res.status(400).json({
+      message: 'File too large. Maximum size is 500MB.',
+      received: fileSize,
+      maxAllowed: maxSize,
     });
     return;
   }
 
   try {
-    // ✅ FIX: Use environment variables safely
-    const region = process.env.AWS_REGION || 'ap-southeast-1';
+    // ✅ FIX: Use environment variables safely with fallbacks
     const bucketName = process.env.S3_BUCKET_NAME;
     const cloudfrontDomain = process.env.CLOUDFRONT_DOMAIN;
 
-    if (!bucketName || !cloudfrontDomain) {
-      throw new Error(
-        'S3_BUCKET_NAME or CLOUDFRONT_DOMAIN environment variables are not set'
-      );
+    if (!bucketName) {
+      throw new Error('S3_BUCKET_NAME environment variable is not set');
+    }
+
+    if (!cloudfrontDomain) {
+      throw new Error('CLOUDFRONT_DOMAIN environment variable is not set');
     }
 
     const s3Client = new S3Client({
-      region: region,
-      // Remove explicit credentials - Lambda will use its execution role
-      // for local development
-      // credentials: {
-      //   accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-      //   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-      // },
+      region: process.env.AWS_REGION!,
+      // For Lambda environment, IAM role should handle credentials
+      // Only use explicit credentials in development
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      },
     });
 
     const sanitizedFileName = sanitizeFilename(fileName);
@@ -296,12 +309,20 @@ export const getUploadVideoUrl = async (
       Bucket: bucketName,
       Key: s3Key,
       ContentType: fileType,
+      // ✅ FIX: Add metadata for better organization
+      Metadata: {
+        'course-id': courseId,
+        'section-id': sectionId,
+        'chapter-id': chapterId,
+        'original-filename': fileName,
+      },
     });
 
     const uploadUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: 3600,
+      expiresIn: 3600, // 1 hour
     });
 
+    // ✅ FIX: Ensure proper URL formatting
     const videoUrl = cloudfrontDomain.startsWith('https://')
       ? `${cloudfrontDomain}/${s3Key}`
       : `https://${cloudfrontDomain}/${s3Key}`;

@@ -147,8 +147,7 @@ const ChapterModal = () => {
               type='textarea'
               placeholder='Write chapter content here'
             />
-
-            <FormField
+            {/* <FormField
               control={methods.control}
               name='video'
               render={({ field: { onChange, value } }) => (
@@ -195,8 +194,66 @@ const ChapterModal = () => {
                   <FormMessage className='text-red-400' />
                 </FormItem>
               )}
-            />
+            /> */}
 
+            <FormField
+              control={methods.control}
+              name='video'
+              render={({ field: { onChange, value } }) => (
+                <FormItem>
+                  <FormLabel className='text-customgreys-dirty-grey text-sm'>
+                    Chapter Video
+                  </FormLabel>
+                  <FormControl>
+                    <div>
+                      <Input
+                        type='file'
+                        accept='video/mp4,video/webm,video/ogg'
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            // Enhanced validation
+                            if (file.size > 500 * 1024 * 1024) {
+                              toast.error('Video file must be less than 500MB');
+                              return;
+                            }
+                            if (!file.type.startsWith('video/')) {
+                              toast.error('Please select a valid video file');
+                              return;
+                            }
+                            if (file.size === 0) {
+                              toast.error('File appears to be empty');
+                              return;
+                            }
+
+                            console.log('📁 File selected:', {
+                              name: file.name,
+                              type: file.type,
+                              size: file.size,
+                            });
+
+                            onChange(file);
+                          }
+                        }}
+                        className='border-none bg-customgreys-dark-grey py-2 cursor-pointer'
+                      />
+                      {typeof value === 'string' && value && (
+                        <div className='my-2 text-sm text-gray-600'>
+                          Current video: {value.split('/').pop()}
+                        </div>
+                      )}
+                      {value instanceof File && (
+                        <div className='my-2 text-sm text-white-100'>
+                          Selected: {value.name} (
+                          {(value.size / (1024 * 1024)).toFixed(2)} MB)
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage className='text-red-400' />
+                </FormItem>
+              )}
+            />
             <div className='chapter-modal__actions'>
               <Button type='button' variant='outline' onClick={onClose}>
                 Cancel

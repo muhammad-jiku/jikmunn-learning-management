@@ -348,7 +348,7 @@ export const uploadAllVideos = async (
       // Only process if video is a File and type should be Video
       if (chapter.video instanceof File) {
         hasVideoFiles = true;
-        // console.log('🎬 Found video file to upload:', chapter.video.name);
+        console.log('🎬 Found video file to upload:', chapter.video.name);
 
         try {
           const updatedChapter = await uploadVideo(
@@ -440,12 +440,16 @@ const uploadVideo = async (
   try {
     const sanitizedFileName = sanitizeFilename(file.name);
 
-    // ✅ FIX: Ensure we have all required fields
-    if (!file.name || !file.type) {
-      throw new Error('File name or type is missing');
+    // ✅ Enhanced validation
+    if (!file.name || !file.type || !file.size) {
+      throw new Error('File metadata is incomplete');
     }
 
-    // Get upload URL
+    if (file.size === 0) {
+      throw new Error('File is empty');
+    }
+
+    // Get upload URL with all required parameters
     console.log('🔄 Getting upload URL...');
     const { uploadUrl, videoUrl } = await getUploadVideoUrl({
       courseId: courseId,
@@ -453,6 +457,7 @@ const uploadVideo = async (
       chapterId: chapter.chapterId,
       fileName: sanitizedFileName,
       fileType: file.type,
+      fileSize: file.size, // Add file size
     }).unwrap();
 
     console.log('📤 Upload URL received:', uploadUrl.substring(0, 100) + '...');
@@ -495,8 +500,6 @@ const uploadVideo = async (
         error instanceof Error ? error.message : 'Unknown error'
       }`
     );
-
-    // Re-throw the error so uploadAllVideos can catch it
     throw error;
   }
 };

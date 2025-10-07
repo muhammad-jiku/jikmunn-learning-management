@@ -40,7 +40,9 @@ app.use(clerkMiddleware());
 
 /* ROUTES */
 app.get('/', (req, res) => {
-  res.send('Hola Amigos! Welcome to Jikmunn Learning Management System API');
+  res.send(
+    'Hola Amigos! Welcome to Jikmunn Learning Management System API! - Oscar Martinez'
+  );
 });
 
 app.use('/courses', courseRoutes);

@@ -141,6 +141,29 @@ export const api = createApi({
       invalidatesTags: ['Courses'],
     }),
 
+    // getUploadVideoUrl: build.mutation<
+    //   { uploadUrl: string; videoUrl: string },
+    //   {
+    //     courseId: string;
+    //     sectionId: string;
+    //     chapterId: string;
+    //     fileName: string;
+    //     fileType: string;
+    //   }
+    // >({
+    //   query: ({ courseId, sectionId, chapterId, fileName, fileType }) => ({
+    //     url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/get-upload-url`,
+    //     method: 'POST',
+    //     body: {
+    //       courseId,
+    //       sectionId,
+    //       chapterId,
+    //       fileName,
+    //       fileType,
+    //     },
+    //   }),
+    // }),
+
     getUploadVideoUrl: build.mutation<
       { uploadUrl: string; videoUrl: string },
       {
@@ -149,17 +172,24 @@ export const api = createApi({
         chapterId: string;
         fileName: string;
         fileType: string;
+        fileSize: number; // Add fileSize for better validation
       }
     >({
-      query: ({ courseId, sectionId, chapterId, fileName, fileType }) => ({
+      query: ({
+        courseId,
+        sectionId,
+        chapterId,
+        fileName,
+        fileType,
+        fileSize,
+      }) => ({
         url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/get-upload-url`,
         method: 'POST',
         body: {
-          courseId,
-          sectionId,
-          chapterId,
           fileName,
           fileType,
+          fileSize,
+          // Don't send courseId, sectionId, chapterId in body since they're in URL
         },
       }),
     }),
