@@ -220,13 +220,34 @@ export const getUploadVideoUrl = async (
   // Extract from URL parameters (these should always be present)
   const { courseId, sectionId, chapterId } = req.params;
 
-  // Extract from request body
-  const { fileName, fileType, fileSize } = req.body;
+  // ✅ FIX: Parse the body from Buffer to JSON if needed
+  let body = req.body;
+
+  // If body is a Buffer, parse it to JSON
+  if (Buffer.isBuffer(body)) {
+    try {
+      body = JSON.parse(body.toString());
+      console.log('✅ Parsed body from Buffer to JSON:', body);
+    } catch (parseError) {
+      console.log('❌ Error parsing Buffer to JSON:', parseError);
+      res.status(400).json({
+        message: 'Invalid JSON body',
+        error:
+          parseError instanceof Error
+            ? parseError.message
+            : 'Unknown parse error',
+      });
+      return;
+    }
+  }
+
+  // Extract from request body (now properly parsed)
+  const { fileName, fileType, fileSize } = body;
 
   // ✅ FIX: Better logging with all data
   console.log('🔍 Upload URL Request:', {
     params: req.params,
-    body: req.body,
+    body: body,
     extracted: { courseId, sectionId, chapterId, fileName, fileType, fileSize },
   });
 
@@ -291,8 +312,6 @@ export const getUploadVideoUrl = async (
 
     const s3Client = new S3Client({
       region: process.env.AWS_REGION!,
-      // For Lambda environment, IAM role should handle credentials
-      // Only use explicit credentials in development
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
@@ -309,7 +328,6 @@ export const getUploadVideoUrl = async (
       Bucket: bucketName,
       Key: s3Key,
       ContentType: fileType,
-      // ✅ FIX: Add metadata for better organization
       Metadata: {
         'course-id': courseId,
         'section-id': sectionId,
