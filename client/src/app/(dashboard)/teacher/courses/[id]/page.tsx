@@ -8,17 +8,19 @@ import Header from '@/components/shared/Header';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { courseSchema } from '@/lib/schemas';
-import {
-  centsToDollars,
-  createCourseFormData,
-  uploadAllVideos,
-} from '@/lib/utils';
+import
+  {
+    centsToDollars,
+    createCourseFormData,
+    uploadAllVideos,
+  } from '@/lib/utils';
 import { openSectionModal, setSections } from '@/state';
-import {
-  useGetCourseQuery,
-  useGetUploadVideoUrlMutation,
-  useUpdateCourseMutation,
-} from '@/state/api';
+import
+  {
+    useGetCourseQuery,
+    useGetUploadVideoUrlMutation,
+    useUpdateCourseMutation,
+  } from '@/state/api';
 import { useAppDispatch, useAppSelector } from '@/state/redux';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Plus } from 'lucide-react';
@@ -71,13 +73,13 @@ const CourseEditor = () => {
       let updatedSections = sections;
 
       try {
-        // console.log('📤 Starting video uploads...');
+        console.log('📤 Starting video uploads...');
         const uploadResult = await uploadAllVideos(
           sections,
           id,
           getUploadVideoUrl
         );
-        // console.log('✅ Video uploads completed');
+        console.log('✅ Video uploads completed');
 
         // Update global state with the new sections containing video URLs
         dispatch(setSections(uploadResult));
@@ -112,7 +114,7 @@ const CourseEditor = () => {
 
       const formData = createCourseFormData(data, validatedSections);
 
-      // console.log('📨 Sending course update to server...');
+      console.log('📨 Sending course update to server...');
       const result = await updateCourse({
         courseId: id,
         formData,

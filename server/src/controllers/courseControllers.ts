@@ -234,29 +234,66 @@ export const getUploadVideoUrl = async (
   const sectionId = paramSectionId || bodySectionId;
   const chapterId = paramChapterId || bodyChapterId;
 
+  // ✅ FIX: Better error logging
+  console.log('🔍 Upload URL Request:', {
+    params: req.params,
+    body: req.body,
+    resolved: { courseId, sectionId, chapterId, fileName, fileType },
+  });
+
   if (!fileName || !fileType || !courseId || !sectionId || !chapterId) {
+    console.log('❌ Missing required fields:', {
+      fileName: !!fileName,
+      fileType: !!fileType,
+      courseId: !!courseId,
+      sectionId: !!sectionId,
+      chapterId: !!chapterId,
+    });
+
     res.status(400).json({
       message: 'All fields are required',
-      received: { fileName, fileType, courseId, sectionId, chapterId },
+      received: {
+        fileName: fileName || 'undefined',
+        fileType: fileType || 'undefined',
+        courseId: courseId || 'undefined',
+        sectionId: sectionId || 'undefined',
+        chapterId: chapterId || 'undefined',
+      },
+      required: ['fileName', 'fileType', 'courseId', 'sectionId', 'chapterId'],
     });
     return;
   }
 
   try {
+    // ✅ FIX: Use environment variables safely
+    const region = process.env.AWS_REGION || 'ap-southeast-1';
+    const bucketName = process.env.S3_BUCKET_NAME;
+    const cloudfrontDomain = process.env.CLOUDFRONT_DOMAIN;
+
+    if (!bucketName || !cloudfrontDomain) {
+      throw new Error(
+        'S3_BUCKET_NAME or CLOUDFRONT_DOMAIN environment variables are not set'
+      );
+    }
+
     const s3Client = new S3Client({
-      region: process.env.AWS_REGION!,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-      },
+      region: region,
+      // Remove explicit credentials - Lambda will use its execution role
+      // for local development
+      // credentials: {
+      //   accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      //   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      // },
     });
 
     const sanitizedFileName = sanitizeFilename(fileName);
     const uniqueId = uuidv4();
     const s3Key = `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/${uniqueId}-${sanitizedFileName}`;
 
+    console.log('🗂️ Generated S3 key:', s3Key);
+
     const command = new PutObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME!,
+      Bucket: bucketName,
       Key: s3Key,
       ContentType: fileType,
     });
@@ -265,17 +302,21 @@ export const getUploadVideoUrl = async (
       expiresIn: 3600,
     });
 
-    const cloudfrontDomain = process.env.CLOUDFRONT_DOMAIN!;
     const videoUrl = cloudfrontDomain.startsWith('https://')
       ? `${cloudfrontDomain}/${s3Key}`
       : `https://${cloudfrontDomain}/${s3Key}`;
+
+    console.log('✅ Generated URLs:', {
+      uploadUrl: uploadUrl.substring(0, 100) + '...',
+      videoUrl,
+    });
 
     res.status(200).json({
       message: 'Upload URL generated successfully',
       data: { uploadUrl, videoUrl },
     });
   } catch (error) {
-    console.log('Error generating upload URL:', error);
+    console.log('💥 Error generating upload URL:', error);
     res.status(500).json({
       message: 'Error generating upload URL',
       error: error instanceof Error ? error.message : 'Unknown error occurred',

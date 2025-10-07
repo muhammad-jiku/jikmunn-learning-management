@@ -323,7 +323,7 @@ export const uploadAllVideos = async (
   courseId: string,
   getUploadVideoUrl: any
 ) => {
-  // console.log('🚀 STARTING uploadAllVideos - Course ID:', courseId);
+  console.log('🚀 STARTING uploadAllVideos - Course ID:', courseId);
 
   // Create a deep copy to avoid mutating Redux state
   const updatedSections = localSections.map((section) => ({
@@ -339,11 +339,11 @@ export const uploadAllVideos = async (
     for (let j = 0; j < section.chapters.length; j++) {
       const chapter = section.chapters[j];
 
-      // console.log(`🔍 Checking chapter: ${chapter.title}`, {
-      //   videoType: typeof chapter.video,
-      //   videoValue: chapter.video,
-      //   currentType: chapter.type,
-      // });
+      console.log(`🔍 Checking chapter: ${chapter.title}`, {
+        videoType: typeof chapter.video,
+        videoValue: chapter.video,
+        currentType: chapter.type,
+      });
 
       // Only process if video is a File and type should be Video
       if (chapter.video instanceof File) {
@@ -358,12 +358,12 @@ export const uploadAllVideos = async (
             getUploadVideoUrl
           );
 
-          // console.log('✅ Video uploaded, updating chapter:', {
-          //   oldVideo: chapter.video,
-          //   newVideo: updatedChapter.video,
-          //   oldType: chapter.type,
-          //   newType: updatedChapter.type,
-          // });
+          console.log('✅ Video uploaded, updating chapter:', {
+            oldVideo: chapter.video,
+            newVideo: updatedChapter.video,
+            oldType: chapter.type,
+            newType: updatedChapter.type,
+          });
 
           // Create a new chapters array with the updated chapter
           updatedSections[i] = {
@@ -393,9 +393,9 @@ export const uploadAllVideos = async (
         }
       } else if (chapter.type === 'Video' && !chapter.video) {
         // If chapter is marked as Video but has no video URL, revert to Text
-        // console.log(
-        //   '⚠️ Chapter marked as Video but has no video, reverting to Text'
-        // );
+        console.log(
+          '⚠️ Chapter marked as Video but has no video, reverting to Text'
+        );
         updatedSections[i] = {
           ...updatedSections[i],
           chapters: updatedSections[i].chapters.map((chap, index) =>
@@ -416,7 +416,7 @@ export const uploadAllVideos = async (
     console.log('ℹ️ No video files found to upload');
   }
 
-  // console.log('🏁 FINAL sections:', JSON.stringify(updatedSections, null, 2));
+  console.log('🏁 FINAL sections:', JSON.stringify(updatedSections, null, 2));
   return updatedSections;
 };
 
@@ -428,20 +428,25 @@ const uploadVideo = async (
 ) => {
   const file = chapter.video as File;
 
-  // console.log('🎬 STARTING uploadVideo:', {
-  //   chapterId: chapter.chapterId,
-  //   courseId,
-  //   sectionId,
-  //   fileName: file.name,
-  //   fileSize: file.size,
-  //   fileType: file.type,
-  // });
+  console.log('🎬 STARTING uploadVideo:', {
+    chapterId: chapter.chapterId,
+    courseId,
+    sectionId,
+    fileName: file.name,
+    fileSize: file.size,
+    fileType: file.type,
+  });
 
   try {
     const sanitizedFileName = sanitizeFilename(file.name);
 
+    // ✅ FIX: Ensure we have all required fields
+    if (!file.name || !file.type) {
+      throw new Error('File name or type is missing');
+    }
+
     // Get upload URL
-    // console.log('🔄 Getting upload URL...');
+    console.log('🔄 Getting upload URL...');
     const { uploadUrl, videoUrl } = await getUploadVideoUrl({
       courseId: courseId,
       sectionId: sectionId,
@@ -450,11 +455,11 @@ const uploadVideo = async (
       fileType: file.type,
     }).unwrap();
 
-    // console.log('📤 Upload URL received:', uploadUrl.substring(0, 100) + '...');
-    // console.log('📺 Video URL that will be saved:', videoUrl);
+    console.log('📤 Upload URL received:', uploadUrl.substring(0, 100) + '...');
+    console.log('📺 Video URL that will be saved:', videoUrl);
 
     // Upload the file
-    // console.log('⬆️  Starting file upload...');
+    console.log('⬆️  Starting file upload...');
     const response = await fetch(uploadUrl, {
       method: 'PUT',
       headers: {
@@ -463,7 +468,7 @@ const uploadVideo = async (
       body: file,
     });
 
-    // console.log('📨 Upload response status:', response.status);
+    console.log('📨 Upload response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -473,8 +478,8 @@ const uploadVideo = async (
       );
     }
 
-    // console.log('✅ Upload successful!');
-    // console.log('💾 Returning chapter with video URL:', videoUrl);
+    console.log('✅ Upload successful!');
+    console.log('💾 Returning chapter with video URL:', videoUrl);
 
     toast.success(`Video uploaded successfully for chapter ${chapter.title}`);
 

@@ -66,8 +66,15 @@ const ChapterModal = () => {
   const onSubmit = (data: ChapterFormData) => {
     if (selectedSectionIndex === null) return;
 
-    // console.log('📝 Submitted data:', data);
-    // console.log('type of video:', typeof data.video, data.video);
+    console.log('📝 Submitted data:', data);
+    console.log('📁 File details:', {
+      hasVideo: !!data.video,
+      videoType: typeof data.video,
+      videoIsFile: data.video instanceof File,
+      videoName: data.video instanceof File ? data.video.name : 'N/A',
+      videoTypeProp: data.video instanceof File ? data.video.type : 'N/A',
+      videoSize: data.video instanceof File ? data.video.size : 'N/A',
+    });
 
     // Determine the type based on whether video is provided
     const hasVideo =
@@ -81,16 +88,16 @@ const ChapterModal = () => {
       title: data.title,
       content: data.content,
       type: hasVideo ? 'Video' : 'Text',
-      video: data.video || '', // Ensure video is always defined
+      video: data.video || '',
     };
 
-    // console.log('📝 Creating/Updating chapter:', {
-    //   chapterId: newChapter.chapterId,
-    //   title: newChapter.title,
-    //   type: newChapter.type,
-    //   video: newChapter.video,
-    //   hasVideo: hasVideo,
-    // });
+    console.log('📝 Creating/Updating chapter:', {
+      chapterId: newChapter.chapterId,
+      title: newChapter.title,
+      type: newChapter.type,
+      video: newChapter.video,
+      hasVideo: hasVideo,
+    });
 
     if (selectedChapterIndex === null) {
       dispatch(
@@ -111,7 +118,7 @@ const ChapterModal = () => {
       toast.success('Chapter updated successfully');
     }
 
-    onClose(); // Close the modal
+    onClose();
   };
 
   return (
