@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/refs */
 'use client';
 
+import QuizBuilder from '@/components/quiz/QuizBuilder';
 import { Button } from '@/components/ui/button';
 import {
   deleteChapter,
@@ -11,11 +13,19 @@ import {
 } from '@/state';
 import { useAppDispatch, useAppSelector } from '@/state/redux';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { Edit, GripVertical, Plus, Trash2 } from 'lucide-react';
+import { Edit, GripVertical, HelpCircle, Plus, Trash2 } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { useState } from 'react';
 
 export default function DroppableComponent() {
   const dispatch = useAppDispatch();
   const { sections } = useAppSelector((state) => state.global.courseEditor);
+  const params = useParams();
+  const courseId = params.id as string;
+  const [quizBuilderState, setQuizBuilderState] = useState<{
+    sectionId: string;
+    chapterId: string;
+  } | null>(null);
 
   const handleSectionDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -44,95 +54,115 @@ export default function DroppableComponent() {
   };
 
   return (
-    <DragDropContext onDragEnd={handleSectionDragEnd}>
-      <Droppable droppableId='sections'>
-        {(provided) => (
-          <div ref={provided.innerRef} {...provided.droppableProps}>
-            {sections.map((section: Section, sectionIndex: number) => (
-              <Draggable
-                key={section.sectionId}
-                draggableId={section.sectionId}
-                index={sectionIndex}
-              >
-                {(draggableProvider) => (
-                  <div
-                    ref={draggableProvider.innerRef}
-                    {...draggableProvider.draggableProps}
-                    className={`droppable-section ${
-                      sectionIndex % 2 === 0
-                        ? 'droppable-section--even'
-                        : 'droppable-section--odd'
-                    }`}
-                  >
-                    <SectionHeader
-                      section={section}
-                      sectionIndex={sectionIndex}
-                      dragHandleProps={draggableProvider.dragHandleProps}
-                    />
-
-                    <DragDropContext
-                      onDragEnd={(result) =>
-                        handleChapterDragEnd(result, sectionIndex)
-                      }
+    <>
+      <DragDropContext onDragEnd={handleSectionDragEnd}>
+        <Droppable droppableId='sections'>
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {sections.map((section: Section, sectionIndex: number) => (
+                <Draggable
+                  key={section.sectionId}
+                  draggableId={section.sectionId}
+                  index={sectionIndex}
+                >
+                  {(draggableProvider) => (
+                    <div
+                      ref={draggableProvider.innerRef}
+                      {...draggableProvider.draggableProps}
+                      className={`droppable-section ${
+                        sectionIndex % 2 === 0
+                          ? 'droppable-section--even'
+                          : 'droppable-section--odd'
+                      }`}
                     >
-                      <Droppable droppableId={`chapters-${section.sectionId}`}>
-                        {(droppableProvider) => (
-                          <div
-                            ref={droppableProvider.innerRef}
-                            {...droppableProvider.droppableProps}
-                          >
-                            {section.chapters.map(
-                              (chapter: Chapter, chapterIndex: number) => (
-                                <Draggable
-                                  key={chapter.chapterId}
-                                  draggableId={chapter.chapterId}
-                                  index={chapterIndex}
-                                >
-                                  {(draggableProvider) => (
-                                    <ChapterItem
-                                      chapter={chapter}
-                                      chapterIndex={chapterIndex}
-                                      sectionIndex={sectionIndex}
-                                      draggableProvider={draggableProvider}
-                                    />
-                                  )}
-                                </Draggable>
-                              )
-                            )}
-                            {droppableProvider.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                    </DragDropContext>
+                      <SectionHeader
+                        section={section}
+                        sectionIndex={sectionIndex}
+                        dragHandleProps={draggableProvider.dragHandleProps}
+                      />
 
-                    <Button
-                      type='button'
-                      variant='outline'
-                      size='sm'
-                      onClick={() =>
-                        dispatch(
-                          openChapterModal({
-                            sectionIndex,
-                            chapterIndex: null,
-                          })
-                        )
-                      }
-                      className='add-chapter-button group'
-                    >
-                      <Plus className='add-chapter-button__icon' />
-                      <span className='add-chapter-button__text'>
-                        Add Chapter
-                      </span>
-                    </Button>
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+                      <DragDropContext
+                        onDragEnd={(result) =>
+                          handleChapterDragEnd(result, sectionIndex)
+                        }
+                      >
+                        <Droppable
+                          droppableId={`chapters-${section.sectionId}`}
+                        >
+                          {(droppableProvider) => (
+                            <div
+                              ref={droppableProvider.innerRef}
+                              {...droppableProvider.droppableProps}
+                            >
+                              {section.chapters.map(
+                                (chapter: Chapter, chapterIndex: number) => (
+                                  <Draggable
+                                    key={chapter.chapterId}
+                                    draggableId={chapter.chapterId}
+                                    index={chapterIndex}
+                                  >
+                                    {(draggableProvider) => (
+                                      <ChapterItem
+                                        chapter={chapter}
+                                        chapterIndex={chapterIndex}
+                                        sectionIndex={sectionIndex}
+                                        sectionId={section.sectionId}
+                                        draggableProvider={draggableProvider}
+                                        onQuizClick={(sectionId, chapterId) =>
+                                          setQuizBuilderState({
+                                            sectionId,
+                                            chapterId,
+                                          })
+                                        }
+                                      />
+                                    )}
+                                  </Draggable>
+                                )
+                              )}
+                              {droppableProvider.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </DragDropContext>
+
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        onClick={() =>
+                          dispatch(
+                            openChapterModal({
+                              sectionIndex,
+                              chapterIndex: null,
+                            })
+                          )
+                        }
+                        className='add-chapter-button group'
+                      >
+                        <Plus className='add-chapter-button__icon' />
+                        <span className='add-chapter-button__text'>
+                          Add Chapter
+                        </span>
+                      </Button>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+
+      {quizBuilderState && courseId && (
+        <QuizBuilder
+          courseId={courseId}
+          sectionId={quizBuilderState.sectionId}
+          chapterId={quizBuilderState.chapterId}
+          onClose={() => setQuizBuilderState(null)}
+        />
+      )}
+    </>
   );
 }
 
@@ -190,12 +220,16 @@ const ChapterItem = ({
   chapter,
   chapterIndex,
   sectionIndex,
+  sectionId,
   draggableProvider,
+  onQuizClick,
 }: {
   chapter: Chapter;
   chapterIndex: number;
   sectionIndex: number;
+  sectionId: string;
   draggableProvider: any;
+  onQuizClick: (sectionId: string, chapterId: string) => void;
 }) => {
   const dispatch = useAppDispatch();
 
@@ -213,8 +247,23 @@ const ChapterItem = ({
       <div className='droppable-chapter__title'>
         <GripVertical className='h-4 w-4 mb-[2px]' />
         <p className='text-sm'>{`${chapterIndex + 1}. ${chapter.title}`}</p>
+        {chapter.quiz && (
+          <span className='ml-2 rounded bg-primary-700/20 px-1.5 py-0.5 text-[10px] text-primary-700'>
+            Quiz
+          </span>
+        )}
       </div>
       <div className='droppable-chapter__actions'>
+        <Button
+          type='button'
+          variant='ghost'
+          size='sm'
+          className='droppable-chapter__button'
+          title='Quiz'
+          onClick={() => onQuizClick(sectionId, chapter.chapterId)}
+        >
+          <HelpCircle className='h-4 w-4' />
+        </Button>
         <Button
           type='button'
           variant='ghost'

@@ -1,0 +1,849 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Component Styles — Cards, Modals, Sidebar, Navbar, Layout, etc.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Dashboard Layout ──────────────────────────────────────────────────── */
+
+.dashboard {
+  @apply min-h-screen w-full bg-customgreys-primarybg flex;
+}
+
+.dashboard__content {
+  @apply flex flex-1 overflow-hidden bg-customgreys-secondarybg;
+}
+
+.dashboard__main {
+  @apply flex-grow min-h-screen transition-all duration-500 ease-in-out overflow-y-auto bg-customgreys-secondarybg;
+}
+
+.dashboard__main--not-course {
+  @apply bg-customgreys-primarybg;
+}
+
+.dashboard__body {
+  @apply px-8 py-4;
+}
+
+/* ─── Chapters Sidebar ──────────────────────────────────────────────────── */
+
+.chapters-sidebar {
+  @apply bg-customgreys-secondarybg border-x border-gray-700 overflow-y-auto transition-all duration-500 ease-in-out flex-shrink-0;
+  height: 100vh;
+}
+
+.chapters-sidebar__title {
+  @apply text-lg font-bold pt-9 pb-6 px-8;
+}
+
+.chapters-sidebar__divider {
+  @apply border-gray-700;
+}
+
+.chapters-sidebar__section {
+  @apply min-w-[300px];
+}
+
+.chapters-sidebar__section-header {
+  @apply cursor-pointer px-8 py-6 hover:bg-gray-700/50;
+}
+
+.chapters-sidebar__section-title-wrapper {
+  @apply flex justify-between items-center;
+}
+
+.chapters-sidebar__section-number {
+  @apply text-gray-500 text-sm;
+}
+
+.chapters-sidebar__chevron {
+  @apply text-white-50/70 w-4 h-4;
+}
+
+.chapters-sidebar__section-title {
+  @apply text-white-50/90 font-semibold;
+}
+
+.chapters-sidebar__section-content {
+  @apply pt-8 pb-8 bg-customgreys-primarybg/40;
+}
+
+.chapters-sidebar__progress {
+  @apply flex justify-between items-center gap-5 mb-2 px-7;
+}
+
+.chapters-sidebar__progress-bars {
+  @apply flex-grow flex gap-1;
+}
+
+.chapters-sidebar__progress-bar {
+  @apply h-1 flex-grow rounded-full bg-gray-700;
+}
+
+.chapters-sidebar__progress-bar--completed {
+  @apply bg-secondary-700;
+}
+
+.chapters-sidebar__trophy {
+  @apply bg-secondary-700 rounded-full p-3 flex items-center justify-center;
+}
+
+.chapters-sidebar__trophy-icon {
+  @apply text-customgreys-secondarybg w-4 h-4;
+}
+
+.chapters-sidebar__progress-text {
+  @apply text-gray-500 text-xs mt-3 mb-5 px-7;
+}
+
+.chapters-sidebar__chapter {
+  @apply flex gap-3 items-center px-7 py-4 text-gray-300 cursor-pointer hover:bg-gray-700/20;
+}
+
+.chapters-sidebar__chapter--current {
+  @apply bg-gray-700/50;
+}
+
+.chapters-sidebar__chapter-check {
+  @apply bg-secondary-700 rounded-full p-1;
+}
+
+.chapters-sidebar__check-icon {
+  @apply text-white-100 w-4 h-4;
+}
+
+.chapters-sidebar__chapter-number {
+  @apply border border-gray-600 rounded-full w-6 h-6 flex items-center justify-center text-xs text-gray-400;
+}
+
+.chapters-sidebar__chapter-number--current {
+  @apply bg-secondary-700 text-gray-800;
+}
+
+.chapters-sidebar__chapter-title {
+  @apply flex-1 text-sm text-gray-500;
+}
+
+.chapters-sidebar__chapter-title--completed {
+  @apply text-gray-500 line-through;
+}
+
+.chapters-sidebar__chapter-title--current {
+  @apply text-secondary-700;
+}
+
+.chapters-sidebar__text-icon {
+  @apply text-gray-500 ml-2 w-4 h-4;
+}
+
+/* ─── Droppable Component ───────────────────────────────────────────────── */
+
+.droppable-section {
+  @apply mb-4 p-2 rounded;
+}
+
+.droppable-section--even {
+  @apply bg-customgreys-dirty-grey/30;
+}
+
+.droppable-section--odd {
+  @apply bg-customgreys-secondarybg;
+}
+
+.droppable-section__header {
+  @apply flex justify-between items-center mb-2 bg-black/30 p-1 rounded;
+}
+
+.droppable-section__title-wrapper {
+  @apply w-full flex flex-col gap-1;
+}
+
+.droppable-section__title-container {
+  @apply w-full flex items-center justify-between;
+}
+
+.droppable-section__title {
+  @apply flex items-center;
+}
+
+.droppable-section__description {
+  @apply text-sm text-customgreys-dirty-grey ml-6;
+}
+
+.droppable-chapter {
+  @apply flex justify-between items-center ml-4 mb-1 rounded px-1;
+}
+
+.droppable-chapter--even {
+  @apply bg-black/40;
+}
+
+.droppable-chapter--odd {
+  @apply bg-black/20;
+}
+
+.droppable-chapter__title {
+  @apply flex items-center;
+}
+
+.droppable-chapter__actions {
+  @apply flex items-center gap-px;
+}
+
+.droppable-chapter__button {
+  @apply p-1;
+}
+
+/* ─── Chapter Modal ─────────────────────────────────────────────────────── */
+
+.chapter-modal {
+  @apply flex flex-col;
+}
+
+.chapter-modal__header {
+  @apply flex justify-between items-center mb-4;
+}
+
+.chapter-modal__title {
+  @apply text-2xl font-bold;
+}
+
+.chapter-modal__close {
+  @apply text-gray-500 hover:text-gray-700;
+}
+
+.chapter-modal__form {
+  @apply space-y-4;
+}
+
+.chapter-modal__video {
+  @apply space-y-2;
+}
+
+.chapter-modal__video-label {
+  @apply text-sm font-medium;
+}
+
+.chapter-modal__preview {
+  @apply flex flex-col items-center space-x-2;
+}
+
+.chapter-modal__toggle {
+  @apply flex items-center space-x-2;
+}
+
+.chapter-modal__toggle-label {
+  @apply text-sm font-medium;
+}
+
+.chapter-modal__actions {
+  @apply flex justify-end space-x-2 mt-6;
+}
+
+/* ─── Section Modal ─────────────────────────────────────────────────────── */
+
+.section-modal {
+  @apply flex flex-col;
+}
+
+.section-modal__header {
+  @apply flex justify-between items-center mb-4;
+}
+
+.section-modal__title {
+  @apply text-2xl font-bold;
+}
+
+.section-modal__close {
+  @apply text-gray-500 hover:text-gray-700;
+}
+
+.section-modal__form {
+  @apply space-y-4;
+}
+
+.section-modal__actions {
+  @apply flex justify-end space-x-2 mt-6;
+}
+
+/* ─── Accordion Sections ────────────────────────────────────────────────── */
+
+.accordion-section {
+  @apply border-x border-b border-gray-600 overflow-hidden first:border-t first:rounded-t-lg last:rounded-b-lg;
+}
+
+.accordion-section__trigger {
+  @apply hover:bg-gray-700/50 bg-customgreys-primarybg/50 px-4 py-3;
+}
+
+.accordion-section__title {
+  @apply text-gray-400 font-medium;
+}
+
+.accordion-section__content {
+  @apply bg-customgreys-secondarybg/50 px-4 py-4;
+}
+
+.accordion-section__chapter {
+  @apply flex items-center text-gray-400/90 py-1;
+}
+
+/* ─── Course Card ───────────────────────────────────────────────────────── */
+
+.course-card {
+  @apply flex flex-col w-full h-[340px] xl:h-[380px] border-none bg-customgreys-primarybg overflow-hidden cursor-pointer hover:bg-white-100/10 transition duration-200;
+}
+
+.course-card__header {
+  @apply h-[350px] xl:h-[380px] p-0 overflow-hidden;
+}
+
+.course-card__image {
+  @apply w-full h-full object-cover transition-transform;
+}
+
+.course-card__content {
+  @apply flex-grow flex flex-col justify-between w-full h-full p-6;
+}
+
+.course-card__title {
+  @apply text-white-100 text-md lg:text-lg font-semibold line-clamp-2;
+}
+
+.course-card__footer {
+  @apply p-0 flex justify-between;
+}
+
+.course-card__category {
+  @apply text-sm bg-customgreys-secondarybg rounded-full px-3 py-2 text-gray-400;
+}
+
+.course-card__price {
+  @apply text-primary-500 font-bold text-md;
+}
+
+/* ─── Course Card Search ────────────────────────────────────────────────── */
+
+.course-card-search {
+  @apply bg-customgreys-secondarybg overflow-hidden rounded-lg hover:bg-white-100/10 transition duration-200 flex flex-col cursor-pointer border-2 h-full;
+}
+
+.course-card-search--selected {
+  @apply border-primary-600;
+}
+
+.course-card-search--unselected {
+  @apply border-transparent;
+}
+
+.course-card-search__image-container {
+  @apply relative w-auto pt-[56.25%];
+}
+
+.course-card-search__image {
+  @apply object-cover transition-transform;
+}
+
+.course-card-search__content {
+  @apply p-4 flex flex-col justify-between flex-grow;
+}
+
+.course-card-search__title {
+  @apply font-semibold line-clamp-1;
+}
+
+.course-card-search__description {
+  @apply text-sm mt-1 line-clamp-2;
+}
+
+.course-card-search__teacher {
+  @apply text-customgreys-dirty-grey text-sm;
+}
+
+.course-card-search__footer {
+  @apply flex justify-between items-center mt-1;
+}
+
+.course-card-search__price {
+  @apply text-primary-500 font-semibold;
+}
+
+.course-card-search__enrollment {
+  @apply text-customgreys-dirty-grey text-sm;
+}
+
+/* ─── Course Card Teacher ───────────────────────────────────────────────── */
+
+.course-card-teacher {
+  @apply w-full h-[400px] p-0 border-none bg-customgreys-primarybg overflow-hidden hover:bg-white-100/10 transition duration-200 flex flex-col;
+}
+
+.course-card-teacher__header {
+  @apply p-0 h-[400px] overflow-hidden;
+}
+
+.course-card-teacher__image {
+  @apply rounded-t-lg w-full h-full object-cover transition-transform;
+}
+
+.course-card-teacher__content {
+  @apply w-full pb-6 pt-4 flex-grow flex flex-col justify-between text-gray-400;
+}
+
+.course-card-teacher__title {
+  @apply text-primary-50 text-md md:text-lg line-clamp-2 overflow-hidden;
+}
+
+.course-card-teacher__category {
+  @apply bg-customgreys-dirty-grey/50 px-2 py-1 mt-3 mb-3 rounded-xl w-fit text-sm;
+}
+
+.course-card-teacher__edit-button {
+  @apply rounded w-full bg-primary-700 border-none hover:bg-primary-600 hover:text-customgreys-primarybg text-white-100 cursor-pointer;
+}
+
+.course-card-teacher__delete-button {
+  @apply rounded w-full bg-red-600 text-white-100 hover:bg-red-400 hover:text-customgreys-primarybg cursor-pointer;
+}
+
+/* ─── Course Preview ────────────────────────────────────────────────────── */
+
+.course-preview {
+  @apply space-y-10;
+}
+
+.course-preview__container {
+  @apply w-full bg-customgreys-secondarybg py-8 px-10 flex flex-col gap-5 rounded-lg;
+}
+
+.course-preview__image-wrapper {
+  @apply mb-2 bg-white-50;
+}
+
+.course-preview__title {
+  @apply text-white-50 text-3xl font-bold mb-2;
+}
+
+/* ─── Custom Modal ──────────────────────────────────────────────────────── */
+
+.custom-modal__overlay {
+  @apply fixed inset-0 bg-black/50 z-40;
+}
+
+.custom-modal__content {
+  @apply fixed inset-y-0 right-0 w-full max-w-md bg-customgreys-secondarybg shadow-lg z-50 overflow-y-auto;
+}
+
+.custom-modal__inner {
+  @apply p-6;
+}
+
+/* ─── Footer ────────────────────────────────────────────────────────────── */
+
+.footer {
+  @apply bg-customgreys-secondarybg bottom-0 w-full py-8 mt-10 text-center text-sm;
+}
+
+.footer__links {
+  @apply mt-2;
+}
+
+.footer__link {
+  @apply text-primary-500 mx-2;
+}
+
+/* ─── Loading ───────────────────────────────────────────────────────────── */
+
+.loading {
+  @apply fixed inset-0 flex gap-2 items-center justify-center bg-customgreys-primarybg;
+}
+
+.loading__spinner {
+  @apply w-6 h-6 animate-spin text-primary-700;
+}
+
+.loading__text {
+  @apply text-sm font-medium text-primary-700;
+}
+
+/* ─── Navbar ────────────────────────────────────────────────────────────── */
+
+.navbar {
+  @apply w-full mb-6 px-4 sm:px-8 pt-7 z-10;
+}
+
+.navbar__container {
+  @apply flex justify-between items-center w-full my-3;
+}
+
+.navbar__search {
+  @apply flex justify-between items-center gap-2 sm:gap-5;
+}
+
+.navbar__search-input {
+  @apply bg-customgreys-primarybg pl-10 sm:pl-14 pr-6 sm:pr-20 py-3 sm:py-4 rounded-xl text-customgreys-dirty-grey hover:text-white-50 hover:bg-customgreys-darker-grey transition-all duration-300 text-sm sm:text-base;
+}
+
+.navbar__search-icon {
+  @apply absolute left-3 sm:left-5 top-1/2 transform -translate-y-1/2 text-customgreys-dirty-grey transition-all duration-300;
+}
+
+.navbar__actions {
+  @apply flex items-center gap-3 sm:gap-6;
+}
+
+.navbar__dark-mode-button {
+  @apply rounded-full flex items-center justify-center;
+}
+
+.navbar__dark-mode-icon {
+  @apply cursor-pointer text-customgreys-dirty-grey w-5 h-5 sm:w-6 sm:h-6 hover:text-white-50;
+}
+
+.navbar__sidebar-trigger {
+  @apply text-customgreys-dirty-grey hover:text-white-50 transition-colors;
+}
+
+.navbar__brand {
+  @apply font-bold text-lg sm:text-xl hover:text-customgreys-dirty-grey;
+}
+
+.navbar__notification-button {
+  @apply relative w-7 h-7 sm:w-8 sm:h-8 bg-gray-800 rounded-full flex items-center justify-center;
+}
+
+.navbar__notification-indicator {
+  @apply absolute top-0 right-0 bg-blue-500 h-1.5 sm:h-2 w-1.5 sm:w-2 rounded-full;
+}
+
+.navbar__notification-icon {
+  @apply text-gray-400 w-4 h-4 sm:w-5 sm:h-5;
+}
+
+/* ─── Toolbar ───────────────────────────────────────────────────────────── */
+
+.toolbar {
+  @apply flex items-center justify-between gap-4 w-full mb-4;
+}
+
+.toolbar__search {
+  @apply w-full px-5 h-12 bg-customgreys-primarybg placeholder-customgreys-dirty-grey text-white border-none rounded-md focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring;
+}
+
+.toolbar__select {
+  @apply h-12 w-[180px] bg-customgreys-primarybg text-customgreys-dirty-grey border-none;
+}
+
+.toolbar__select-item {
+  @apply hover:bg-white-50! text-gray-500 hover:text-customgreys-primarybg! cursor-pointer;
+}
+
+/* ─── Wizard Stepper ────────────────────────────────────────────────────── */
+
+.wizard-stepper {
+  @apply w-1/2 mb-4 flex flex-col items-center;
+}
+
+.wizard-stepper__container {
+  @apply w-full flex items-center justify-between mb-2;
+}
+
+.wizard-stepper__step {
+  @apply flex flex-col items-center;
+}
+
+.wizard-stepper__circle {
+  @apply w-8 h-8 flex items-center justify-center rounded-full mb-2;
+}
+
+.wizard-stepper__circle--completed {
+  @apply bg-green-500;
+}
+
+.wizard-stepper__circle--current {
+  @apply bg-primary-700;
+}
+
+.wizard-stepper__circle--upcoming {
+  @apply border border-customgreys-dirty-grey text-customgreys-dirty-grey;
+}
+
+.wizard-stepper__text {
+  @apply text-sm;
+}
+
+.wizard-stepper__text--active {
+  @apply text-white-100;
+}
+
+.wizard-stepper__text--inactive {
+  @apply text-customgreys-dirty-grey;
+}
+
+.wizard-stepper__line {
+  @apply w-1/4 h-px self-start mt-4;
+}
+
+.wizard-stepper__line--completed {
+  @apply bg-green-500;
+}
+
+.wizard-stepper__line--incomplete {
+  @apply bg-customgreys-dirty-grey;
+}
+
+/* ─── NonDashboard Navbar ───────────────────────────────────────────────── */
+
+.nondashboard-navbar {
+  @apply w-full flex justify-center bg-customgreys-primarybg;
+}
+
+.nondashboard-navbar__container {
+  @apply flex justify-between items-center w-3/4 py-8;
+}
+
+.nondashboard-navbar__search {
+  @apply flex justify-between items-center gap-14;
+}
+
+.nondashboard-navbar__brand {
+  @apply font-bold text-lg sm:text-xl hover:text-customgreys-dirty-grey;
+}
+
+.nondashboard-navbar__search-input {
+  @apply bg-customgreys-secondarybg pl-10 sm:pl-14 pr-6 sm:pr-20 py-3 sm:py-4 rounded-xl text-customgreys-dirty-grey hover:text-white-50 hover:bg-customgreys-darker-grey transition-all duration-300 text-sm sm:text-base;
+}
+
+.nondashboard-navbar__search-icon {
+  @apply absolute left-3 sm:left-5 top-1/2 transform -translate-y-1/2 text-customgreys-dirty-grey transition-all duration-300;
+}
+
+.nondashboard-navbar__actions {
+  @apply flex items-center gap-2 sm:gap-4;
+}
+
+.nondashboard-navbar__notification-button {
+  @apply relative w-7 h-7 sm:w-8 sm:h-8 bg-gray-800 rounded-full flex items-center justify-center;
+}
+
+.nondashboard-navbar__notification-indicator {
+  @apply absolute top-0 right-0 bg-blue-500 h-1.5 sm:h-2 w-1.5 sm:w-2 rounded-full;
+}
+
+.nondashboard-navbar__notification-icon {
+  @apply text-gray-400 w-4 h-4 sm:w-5 sm:h-5;
+}
+
+.nondashboard-navbar__auth-button--login {
+  @apply text-customgreys-dirty-grey hover:bg-customgreys-darker-grey hover:text-white-50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md border-customgreys-dirty-grey border text-sm sm:text-base;
+}
+
+.nondashboard-navbar__auth-button--signup {
+  @apply bg-indigo-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-primary-600 hover:text-customgreys-primarybg text-sm sm:text-base;
+}
+
+/* ─── Shared Notification Settings ──────────────────────────────────────── */
+
+.notification-settings {
+  @apply space-y-4;
+}
+
+.notification-settings__form {
+  @apply space-y-4;
+}
+
+.notification-settings__fields {
+  @apply space-y-6;
+}
+
+.notification-settings__submit {
+  @apply mt-8! text-gray-100 bg-primary-700 hover:bg-primary-600;
+}
+
+/* ─── Header ────────────────────────────────────────────────────────────── */
+
+.header {
+  @apply mb-7 flex justify-between items-center;
+}
+
+.header__title {
+  @apply text-3xl font-bold text-white-50;
+}
+
+.header__subtitle {
+  @apply text-sm text-gray-500 mt-1;
+}
+
+/* ─── Dark Mode Button ──────────────────────────────────────────────────── */
+
+.dark-mode-button {
+  @apply cursor-pointer text-customgreys-dirty-grey w-5 h-5 sm:w-6 sm:h-6 hover:text-white-50;
+}
+
+/* ─── Add Chapter Button ────────────────────────────────────────────────── */
+
+.add-chapter-button {
+  @apply border-none text-primary-700;
+}
+
+.add-chapter-button__icon {
+  @apply mr-1 h-4 w-4 text-primary-700;
+}
+
+.add-chapter-button__text {
+  @apply text-primary-700;
+}
+
+/* ─── AppSidebar ────────────────────────────────────────────────────────── */
+
+.app-sidebar__menu {
+  @apply mt-5 group-data-[collapsible=icon]:mt-7;
+}
+
+.app-sidebar__logo-container {
+  @apply flex justify-between items-center gap-5 pl-3 pr-1 h-10 w-full group-data-[collapsible=icon]:ml-1 group-data-[collapsible=icon]:w-10 group-data-[collapsible=icon]:px-0;
+}
+
+.app-sidebar__logo-wrapper {
+  @apply flex items-center gap-5;
+}
+
+.app-sidebar__logo {
+  @apply transition duration-200 group-hover:group-data-[collapsible=icon]:brightness-75 w-auto;
+}
+
+.app-sidebar__title {
+  @apply text-lg text-white-50 font-extrabold group-data-[collapsible=icon]:hidden;
+}
+
+.app-sidebar__collapse-icon {
+  @apply text-gray-400 w-5 h-5 group-data-[collapsible=icon]:hidden;
+}
+
+.app-sidebar__nav-menu {
+  @apply mt-7 gap-0;
+}
+
+.app-sidebar__nav-item {
+  @apply group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-4 hover:bg-customgreys-secondarybg;
+}
+
+.app-sidebar__nav-button {
+  @apply gap-4 p-8 hover:bg-customgreys-secondarybg group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center;
+}
+
+.app-sidebar__nav-link {
+  @apply relative flex items-center;
+}
+
+.app-sidebar__nav-text {
+  @apply font-medium text-md ml-4 group-data-[collapsible=icon]:hidden;
+}
+
+.app-sidebar__active-indicator {
+  @apply absolute right-0 top-0 h-full w-[4px] bg-primary-750;
+}
+
+.app-sidebar__signout {
+  @apply text-primary-600 pl-8 hover:bg-customgreys-primarybg hover:text-primary-700;
+}
+
+/* ─── Layout Helpers ────────────────────────────────────────────────────── */
+
+.nondashboard-layout {
+  @apply flex flex-col min-h-screen w-full;
+}
+
+.nondashboard-layout__main {
+  @apply flex flex-grow w-full h-full justify-center items-center;
+}
+
+.auth-layout {
+  @apply h-full w-full bg-customgreys-primarybg;
+}
+
+.auth-layout__main {
+  @apply w-full flex h-full justify-center items-center;
+}
+
+.root-layout {
+  @apply mx-auto w-full h-full justify-center items-center;
+}
+
+/* ─── Dashboard Navbar ──────────────────────────────────────────────────── */
+
+.dashboard-navbar {
+  @apply w-full mb-6 px-4 sm:px-8 pt-7 z-10;
+}
+
+.dashboard-navbar__container {
+  @apply flex justify-between items-center w-full my-3;
+}
+
+.dashboard-navbar__search {
+  @apply flex justify-between items-center gap-2 sm:gap-5;
+}
+
+.dashboard-navbar__search-input {
+  @apply bg-customgreys-primarybg pl-10 sm:pl-14 pr-6 sm:pr-20 py-3 sm:py-4 rounded-xl text-customgreys-dirty-grey hover:text-white-50 hover:bg-customgreys-darker-grey transition-all duration-300 text-sm sm:text-base;
+}
+
+.dashboard-navbar__search-icon {
+  @apply absolute left-3 sm:left-5 top-1/2 transform -translate-y-1/2 text-customgreys-dirty-grey transition-all duration-300;
+}
+
+.dashboard-navbar__actions {
+  @apply flex items-center gap-3 sm:gap-6;
+}
+
+.dashboard-navbar__dark-mode-button {
+  @apply rounded-full flex items-center justify-center;
+}
+
+.dashboard-navbar__dark-mode-icon {
+  @apply cursor-pointer text-customgreys-dirty-grey w-5 h-5 sm:w-6 sm:h-6 hover:text-white-50;
+}
+
+.dashboard-navbar__sidebar-trigger {
+  @apply text-customgreys-dirty-grey hover:text-white-50 transition-colors;
+}
+
+/* ─── Group Hover Effects ───────────────────────────────────────────────── */
+
+.group:hover .dashboard-navbar__search-icon,
+.group:hover .nondashboard-navbar__search-icon {
+  @apply text-white-50;
+}
+
+.group:hover .dashboard-navbar__search-input,
+.group:hover .nondashboard-navbar__search-input {
+  @apply bg-customgreys-darker-grey text-white-50;
+}
+
+.group .course-card__image {
+  @apply hover:scale-105 w-auto;
+}
+
+.group .course-card-search__image {
+  @apply hover:scale-105 w-auto;
+}
+
+.group .course-card-teacher__image {
+  @apply hover:scale-105 w-auto;
+}
+
+.group:hover .navbar__search-icon {
+  @apply text-white-50;
+}
+
+.group:hover .navbar__search-input {
+  @apply bg-customgreys-darker-grey text-white-50;
+}
+
+.group:hover .add-chapter-button__icon,
+.group:hover .add-chapter-button__text {
+  @apply text-white-100;
+}
+
+[data-collapsible='icon'] .group:hover .app-sidebar__logo {
+  @apply brightness-75;
+}

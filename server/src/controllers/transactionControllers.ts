@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
+import logger from '../config/logger';
 import Course from '../models/courseModel';
 import Transaction from '../models/transactionModel';
 import UserCourseProgress from '../models/userCourseProgressModel';
@@ -23,15 +25,15 @@ export const listTransactions = async (
 
   try {
     const transactions = userId
-      ? await Transaction.query('userId').eq(userId).exec()
-      : await Transaction.scan().exec();
+      ? await Transaction.find({ userId }).sort({ dateTime: -1 })
+      : await Transaction.find().sort({ dateTime: -1 });
 
     res.status(200).json({
       message: 'Transactions retrieved successfully',
       data: transactions,
     });
   } catch (error) {
-    console.log('Error fetching transactions:', error);
+    logger.error('Error fetching transactions', { userId, error });
     res.status(500).json({
       message: 'Error retrieving transactions',
       error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -66,7 +68,7 @@ export const createStripePaymentIntent = async (
       },
     });
   } catch (error) {
-    console.log('Error creating stripe payment intent:', error);
+    logger.error('Error creating stripe payment intent', { error });
     res.status(500).json({
       message: 'Error creating stripe payment intent',
       error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -78,34 +80,14 @@ export const createTransaction = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  // ✅ ADD: Lambda body parsing (same as your courseController)
-  let requestBody = req.body;
-  if (Buffer.isBuffer(req.body)) {
-    try {
-      requestBody = JSON.parse(req.body.toString());
-      // console.log(
-      //   '✅ Parsed transaction body from Buffer to JSON:',
-      //   requestBody
-      // );
-    } catch (parseError) {
-      console.log('❌ Error parsing transaction Buffer to JSON:', parseError);
-      res.status(400).json({
-        message: 'Invalid JSON body',
-      });
-      return;
-    }
-  }
-
-  // ✅ USE requestBody instead of req.body
-  const { userId, courseId, transactionId, amount, paymentProvider } =
-    requestBody;
+  const { userId, courseId, transactionId, amount, paymentProvider } = req.body;
 
   // console.log('🔍 Transaction creation request:', requestBody);
 
   try {
     // Validate required fields
     if (!userId || !courseId || !transactionId || !paymentProvider) {
-      console.log('❌ Missing required fields:', {
+      logger.warn('Missing required transaction fields', {
         userId,
         courseId,
         transactionId,
@@ -114,13 +96,13 @@ export const createTransaction = async (
       res.status(400).json({
         message:
           'Missing required fields: userId, courseId, transactionId, paymentProvider',
-        received: requestBody,
+        received: req.body,
       });
       return;
     }
 
     // 1. Get course info
-    const course = await Course.get(courseId);
+    const course = await Course.findOne({ courseId });
     if (!course) {
       res.status(404).json({ message: 'Course not found' });
       return;
@@ -172,6 +154,14 @@ export const createTransaction = async (
       await course.save();
     }
 
+    logger.info('AUDIT: Course purchased', {
+      userId,
+      courseId,
+      transactionId,
+      amount,
+      paymentProvider,
+    });
+
     res.status(201).json({
       message: 'Course purchased successfully',
       data: {
@@ -180,7 +170,10 @@ export const createTransaction = async (
       },
     });
   } catch (error) {
-    console.log('Error creating transaction and enrollment:', error);
+    logger.error('Error creating transaction and enrollment', {
+      courseId,
+      error,
+    });
     res.status(500).json({
       message: 'Error creating transaction and enrollment',
       error: error instanceof Error ? error.message : 'Unknown error occurred',

@@ -3,10 +3,13 @@
 import { SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { Bell, BookOpen } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import Link from 'next/link';
+import ThemeToggle from './ThemeToggle';
 
 const NonDashboardNavbar = () => {
   const { user } = useUser();
+  const { theme } = useTheme();
   const userRole = user?.publicMetadata?.userType as 'student' | 'teacher';
 
   return (
@@ -34,6 +37,8 @@ const NonDashboardNavbar = () => {
           </div>
         </div>
         <div className='nondashboard-navbar__actions'>
+          <ThemeToggle />
+
           <button className='nondashboard-navbar__notification-button'>
             <span className='nondashboard-navbar__notification-indicator'></span>
             <Bell className='nondashboard-navbar__notification-icon' />
@@ -42,7 +47,7 @@ const NonDashboardNavbar = () => {
           <SignedIn>
             <UserButton
               appearance={{
-                baseTheme: dark,
+                baseTheme: theme === 'dark' ? dark : undefined,
                 elements: {
                   userButtonOuterIdentifier: 'text-customgreys-dirty-grey',
                   userButtonBox: 'scale-90 sm:scale-100',

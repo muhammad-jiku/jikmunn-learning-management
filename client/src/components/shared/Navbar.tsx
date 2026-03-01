@@ -5,10 +5,13 @@ import { cn } from '@/lib/utils';
 import { UserButton, useUser } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { Bell, BookOpen } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import Link from 'next/link';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = ({ isCoursePage }: { isCoursePage: boolean }) => {
   const { user } = useUser();
+  const { theme } = useTheme();
   const userRole = user?.publicMetadata?.userType as 'student' | 'teacher';
 
   return (
@@ -37,6 +40,8 @@ const Navbar = ({ isCoursePage }: { isCoursePage: boolean }) => {
         </div>
 
         <div className='dashboard-navbar__actions'>
+          <ThemeToggle />
+
           <button className='nondashboard-navbar__notification-button'>
             <span className='nondashboard-navbar__notification-indicator'></span>
             <Bell className='nondashboard-navbar__notification-icon' />
@@ -44,7 +49,7 @@ const Navbar = ({ isCoursePage }: { isCoursePage: boolean }) => {
 
           <UserButton
             appearance={{
-              baseTheme: dark,
+              baseTheme: theme === 'dark' ? dark : undefined,
               elements: {
                 userButtonOuterIdentifier: 'text-customgreys-dirty-grey',
                 userButtonBox: 'scale-90 sm:scale-100',

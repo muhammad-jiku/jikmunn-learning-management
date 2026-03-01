@@ -1,40 +1,57 @@
-import { Schema, model } from 'dynamoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-const chapterProgressSchema = new Schema({
-  chapterId: {
-    type: String,
-    required: true,
-  },
-  completed: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
-});
+export interface IChapterProgress {
+  chapterId: string;
+  completed: boolean;
+  quizScore?: number;
+  quizPassed?: boolean;
+}
 
-const sectionProgressSchema = new Schema({
-  sectionId: {
-    type: String,
-    required: true,
-  },
-  chapters: {
-    type: Array,
-    schema: [chapterProgressSchema],
-    default: [],
-  },
-});
+export interface ISectionProgress {
+  sectionId: string;
+  chapters: IChapterProgress[];
+}
 
-const userCourseProgressSchema = new Schema(
+export interface IUserCourseProgress extends Document {
+  userId: string;
+  courseId: string;
+  enrollmentDate: string;
+  overallProgress: number;
+  sections: ISectionProgress[];
+  lastAccessedTimestamp: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const chapterProgressSchema = new Schema<IChapterProgress>(
+  {
+    chapterId: { type: String, required: true },
+    completed: { type: Boolean, default: false },
+    quizScore: { type: Number },
+    quizPassed: { type: Boolean },
+  },
+  { _id: false }
+);
+
+const sectionProgressSchema = new Schema<ISectionProgress>(
+  {
+    sectionId: { type: String, required: true },
+    chapters: { type: [chapterProgressSchema], default: [] },
+  },
+  { _id: false }
+);
+
+const userCourseProgressSchema = new Schema<IUserCourseProgress>(
   {
     userId: {
       type: String,
-      hashKey: true,
       required: true,
+      index: true,
     },
     courseId: {
       type: String,
-      rangeKey: true,
       required: true,
+      index: true,
     },
     enrollmentDate: {
       type: String,
@@ -42,12 +59,10 @@ const userCourseProgressSchema = new Schema(
     },
     overallProgress: {
       type: Number,
-      required: true,
       default: 0,
     },
     sections: {
-      type: Array,
-      schema: [sectionProgressSchema],
+      type: [sectionProgressSchema],
       default: [],
     },
     lastAccessedTimestamp: {
@@ -60,7 +75,10 @@ const userCourseProgressSchema = new Schema(
   }
 );
 
-const UserCourseProgress = model(
+// Composite unique index for user progress queries
+userCourseProgressSchema.index({ userId: 1, courseId: 1 }, { unique: true });
+
+const UserCourseProgress = mongoose.model<IUserCourseProgress>(
   'UserCourseProgress',
   userCourseProgressSchema
 );

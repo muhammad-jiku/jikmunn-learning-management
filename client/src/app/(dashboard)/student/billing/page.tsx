@@ -1,23 +1,21 @@
 'use client';
 
 import Loading from '@/components/shared/Loading';
-import
-  {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-  } from '@/components/ui/select';
-import
-  {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-  } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { formatPrice } from '@/lib/utils';
 import { useGetTransactionsQuery } from '@/state/api';
 import { useUser } from '@clerk/nextjs';

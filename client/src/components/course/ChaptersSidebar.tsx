@@ -7,6 +7,7 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronUp,
+  Eye,
   FileText,
   Trophy,
 } from 'lucide-react';
@@ -305,6 +306,15 @@ const Chapter = ({
       </span>
       {chapter.type === 'Text' && (
         <FileText className='chapters-sidebar__text-icon' />
+      )}
+      {chapter.freePreview && (
+        <span
+          className='ml-auto flex items-center gap-1 rounded bg-primary-700/20 px-1.5 py-0.5 text-xs text-primary-500'
+          title='Free Preview'
+        >
+          <Eye className='h-3 w-3' />
+          Free
+        </span>
       )}
     </li>
   );

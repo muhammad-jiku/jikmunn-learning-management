@@ -65,7 +65,15 @@ const customBaseQuery = async (
 export const api = createApi({
   baseQuery: customBaseQuery,
   reducerPath: 'api',
-  tagTypes: ['Courses', 'Users', 'UserCourseProgress', 'Transactions'],
+  tagTypes: [
+    'Courses',
+    'Users',
+    'UserCourseProgress',
+    'Transactions',
+    'Comments',
+    'Quizzes',
+    'Reviews',
+  ],
   endpoints: (build) => ({
     /* 
     ===============
@@ -141,57 +149,68 @@ export const api = createApi({
       invalidatesTags: ['Courses'],
     }),
 
-    // getUploadVideoUrl: build.mutation<
-    //   { uploadUrl: string; videoUrl: string },
-    //   {
-    //     courseId: string;
-    //     sectionId: string;
-    //     chapterId: string;
-    //     fileName: string;
-    //     fileType: string;
-    //   }
-    // >({
-    //   query: ({ courseId, sectionId, chapterId, fileName, fileType }) => ({
-    //     url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/get-upload-url`,
-    //     method: 'POST',
-    //     body: {
-    //       courseId,
-    //       sectionId,
-    //       chapterId,
-    //       fileName,
-    //       fileType,
-    //     },
-    //   }),
-    // }),
+    getUploadImageSignature: build.mutation<
+      {
+        signature: string;
+        timestamp: number;
+        cloudName: string;
+        apiKey: string;
+        folder: string;
+      },
+      string
+    >({
+      query: (courseId) => ({
+        url: `courses/${courseId}/upload-signature`,
+        method: 'POST',
+      }),
+    }),
 
-    getUploadVideoUrl: build.mutation<
-      { uploadUrl: string; videoUrl: string },
+    /* 
+    ===============
+    COMMENTS
+    =============== 
+    */
+    getChapterComments: build.query<
+      ChapterComment[],
+      { courseId: string; sectionId: string; chapterId: string }
+    >({
+      query: ({ courseId, sectionId, chapterId }) =>
+        `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/comments`,
+      providesTags: (result, error, { chapterId }) => [
+        { type: 'Comments', id: chapterId },
+      ],
+    }),
+
+    addComment: build.mutation<
+      ChapterComment,
+      { courseId: string; sectionId: string; chapterId: string; text: string }
+    >({
+      query: ({ courseId, sectionId, chapterId, text }) => ({
+        url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/comments`,
+        method: 'POST',
+        body: { text },
+      }),
+      invalidatesTags: (result, error, { chapterId }) => [
+        { type: 'Comments', id: chapterId },
+      ],
+    }),
+
+    deleteComment: build.mutation<
+      { message: string },
       {
         courseId: string;
         sectionId: string;
         chapterId: string;
-        fileName: string;
-        fileType: string;
-        fileSize: number; // Add fileSize for better validation
+        commentId: string;
       }
     >({
-      query: ({
-        courseId,
-        sectionId,
-        chapterId,
-        fileName,
-        fileType,
-        fileSize,
-      }) => ({
-        url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/get-upload-url`,
-        method: 'POST',
-        body: {
-          fileName,
-          fileType,
-          fileSize,
-          // Don't send courseId, sectionId, chapterId in body since they're in URL
-        },
+      query: ({ courseId, sectionId, chapterId, commentId }) => ({
+        url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/comments/${commentId}`,
+        method: 'DELETE',
       }),
+      invalidatesTags: (result, error, { chapterId }) => [
+        { type: 'Comments', id: chapterId },
+      ],
     }),
 
     /* 
@@ -282,6 +301,174 @@ export const api = createApi({
         }
       },
     }),
+
+    /* 
+    ===============
+    QUIZZES
+    =============== 
+    */
+    getChapterQuiz: build.query<
+      Quiz,
+      { courseId: string; sectionId: string; chapterId: string }
+    >({
+      query: ({ courseId, sectionId, chapterId }) =>
+        `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/quiz`,
+      providesTags: (result, error, { chapterId }) => [
+        { type: 'Quizzes', id: chapterId },
+      ],
+    }),
+
+    getChapterQuizTeacher: build.query<
+      Quiz,
+      { courseId: string; sectionId: string; chapterId: string }
+    >({
+      query: ({ courseId, sectionId, chapterId }) =>
+        `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/quiz/teacher`,
+      providesTags: (result, error, { chapterId }) => [
+        { type: 'Quizzes', id: chapterId },
+      ],
+    }),
+
+    upsertChapterQuiz: build.mutation<
+      Quiz,
+      {
+        courseId: string;
+        sectionId: string;
+        chapterId: string;
+        quiz: Partial<Quiz>;
+      }
+    >({
+      query: ({ courseId, sectionId, chapterId, quiz }) => ({
+        url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/quiz`,
+        method: 'POST',
+        body: quiz,
+      }),
+      invalidatesTags: (result, error, { chapterId, courseId }) => [
+        { type: 'Quizzes', id: chapterId },
+        { type: 'Courses', id: courseId },
+      ],
+    }),
+
+    deleteChapterQuiz: build.mutation<
+      { message: string },
+      { courseId: string; sectionId: string; chapterId: string }
+    >({
+      query: ({ courseId, sectionId, chapterId }) => ({
+        url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/quiz`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, { chapterId, courseId }) => [
+        { type: 'Quizzes', id: chapterId },
+        { type: 'Courses', id: courseId },
+      ],
+    }),
+
+    submitQuizAnswers: build.mutation<
+      QuizAttempt & {
+        questionResults: any[];
+        passingScore: number;
+        message: string;
+      },
+      {
+        courseId: string;
+        sectionId: string;
+        chapterId: string;
+        answers: Record<string, string>;
+      }
+    >({
+      query: ({ courseId, sectionId, chapterId, answers }) => ({
+        url: `courses/${courseId}/sections/${sectionId}/chapters/${chapterId}/quiz/submit`,
+        method: 'POST',
+        body: { answers },
+      }),
+      invalidatesTags: ['UserCourseProgress'],
+    }),
+
+    /* 
+    ===============
+    REVIEWS
+    =============== 
+    */
+    getCourseReviews: build.query<
+      {
+        reviews: Review[];
+        summary: {
+          averageRating: number;
+          totalReviews: number;
+          distribution: Record<string, number>;
+        };
+      },
+      { courseId: string; rating?: number; sort?: string }
+    >({
+      query: ({ courseId, rating, sort }) => ({
+        url: `reviews/courses/${courseId}/reviews`,
+        params: { ...(rating && { rating }), ...(sort && { sort }) },
+      }),
+      providesTags: (result, error, { courseId }) => [
+        { type: 'Reviews', id: courseId },
+      ],
+    }),
+
+    getCourseRatingSummary: build.query<CourseRatingSummary, string>({
+      query: (courseId) => `reviews/courses/${courseId}/rating`,
+      providesTags: (result, error, courseId) => [
+        { type: 'Reviews', id: courseId },
+      ],
+    }),
+
+    addReview: build.mutation<
+      Review,
+      { courseId: string; rating: number; comment?: string }
+    >({
+      query: ({ courseId, rating, comment }) => ({
+        url: `reviews/courses/${courseId}/reviews`,
+        method: 'POST',
+        body: { rating, comment },
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: 'Reviews', id: courseId },
+      ],
+    }),
+
+    updateReview: build.mutation<
+      Review,
+      { reviewId: string; courseId: string; rating?: number; comment?: string }
+    >({
+      query: ({ reviewId, rating, comment }) => ({
+        url: `reviews/${reviewId}`,
+        method: 'PUT',
+        body: { rating, comment },
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: 'Reviews', id: courseId },
+      ],
+    }),
+
+    deleteReview: build.mutation<
+      { message: string },
+      { reviewId: string; courseId: string }
+    >({
+      query: ({ reviewId }) => ({
+        url: `reviews/${reviewId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: 'Reviews', id: courseId },
+      ],
+    }),
+
+    markReviewHelpful: build.mutation<
+      Review,
+      { reviewId: string; courseId: string }
+    >({
+      query: ({ reviewId }) => ({
+        url: `reviews/${reviewId}/helpful`,
+        method: 'PUT',
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: 'Reviews', id: courseId },
+      ],
+    }),
   }),
 });
 
@@ -292,11 +479,25 @@ export const {
   useDeleteCourseMutation,
   useGetCoursesQuery,
   useGetCourseQuery,
-  useGetUploadVideoUrlMutation,
+  useGetUploadImageSignatureMutation,
+  useGetChapterCommentsQuery,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
   useGetTransactionsQuery,
   useCreateTransactionMutation,
   useCreateStripePaymentIntentMutation,
   useGetUserEnrolledCoursesQuery,
   useGetUserCourseProgressQuery,
   useUpdateUserCourseProgressMutation,
+  useGetChapterQuizQuery,
+  useGetChapterQuizTeacherQuery,
+  useUpsertChapterQuizMutation,
+  useDeleteChapterQuizMutation,
+  useSubmitQuizAnswersMutation,
+  useGetCourseReviewsQuery,
+  useGetCourseRatingSummaryQuery,
+  useAddReviewMutation,
+  useUpdateReviewMutation,
+  useDeleteReviewMutation,
+  useMarkReviewHelpfulMutation,
 } = api;

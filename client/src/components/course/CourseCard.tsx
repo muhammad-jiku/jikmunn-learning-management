@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/card';
 import { formatPrice } from '@/lib/utils';
 import Image from 'next/image';
+import CourseRatingBadge from './CourseRatingBadge';
 
 const CourseCard = ({ course, onGoToCourse }: CourseCardProps) => {
   return (
@@ -39,6 +40,8 @@ const CourseCard = ({ course, onGoToCourse }: CourseCardProps) => {
             {course.teacherName}
           </p>
         </div>
+
+        <CourseRatingBadge courseId={course.courseId} />
 
         <CardFooter className='course-card__footer'>
           <div className='course-card__category'>{course.category}</div>

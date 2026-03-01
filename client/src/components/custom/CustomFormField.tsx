@@ -1,22 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from '@/components/ui/button';
-import
-  {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-  } from '@/components/ui/form';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import
-  {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-  } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { registerPlugin } from 'filepond';
@@ -27,13 +25,12 @@ import 'filepond/dist/filepond.min.css';
 import { Edit, Plus, X } from 'lucide-react';
 import React from 'react';
 import { FilePond } from 'react-filepond';
-import
-  {
-    ControllerRenderProps,
-    FieldValues,
-    useFieldArray,
-    useFormContext,
-  } from 'react-hook-form';
+import {
+  ControllerRenderProps,
+  FieldValues,
+  useFieldArray,
+  useFormContext,
+} from 'react-hook-form';
 
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
 
@@ -110,7 +107,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
                 <SelectItem
                   key={option.value}
                   value={option.value}
-                 className={`cursor-pointer hover:!bg-gray-100 text-gray-500 hover:!text-customgreys-dark-grey`}
+                  className={`cursor-pointer hover:!bg-gray-100 text-gray-500 hover:!text-customgreys-dark-grey`}
                 >
                   {option.label}
                 </SelectItem>
@@ -132,7 +129,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             </FormLabel>
           </div>
         );
-      case 'file':
+      case 'file': {
         const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg'];
         const acceptedFileTypes = accept ? [accept] : ACCEPTED_VIDEO_TYPES;
 
@@ -153,6 +150,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             credits={false}
           />
         );
+      }
       case 'number':
         return (
           <Input

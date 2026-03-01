@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/utils';
 import AccordionSections from '../shared/AccordionSections';
+import CourseRatingBadge from './CourseRatingBadge';
 
 const SelectedCourse = ({ course, handleEnrollNow }: SelectedCourseProps) => {
   return (
@@ -13,6 +14,7 @@ const SelectedCourse = ({ course, handleEnrollNow }: SelectedCourseProps) => {
             {course?.enrollments?.length}
           </span>
         </p>
+        <CourseRatingBadge courseId={course.courseId} size='md' />
       </div>
 
       <div className='selected-course__content'>

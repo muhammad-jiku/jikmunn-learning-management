@@ -8,26 +8,26 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [courseId, setCourseId] = useState<string | null>(null);
   const { user, isLoaded } = useUser();
 
-  const isCoursePage =
-    /^\/student\/courses\/[^\/]+(?:\/chapters\/[^\/]+)?$/.test(pathname);
+  const isCoursePage = useMemo(
+    () => /^\/student\/courses\/[^/]+(?:\/chapters\/[^/]+)?$/.test(pathname),
+    [pathname]
+  );
 
-  useEffect(() => {
+  const courseId = useMemo(() => {
     if (isCoursePage) {
-      const match = pathname.match(/\/student\/courses\/([^\/]+)/);
-      setCourseId(match ? match[1] : null);
-    } else {
-      setCourseId(null);
+      const match = pathname.match(/\/student\/courses\/([^/]+)/);
+      return match ? match[1] : null;
     }
+    return null;
   }, [isCoursePage, pathname]);
 
   if (!isLoaded) return <Loading />;

@@ -1,0 +1,55 @@
+# Dependencies
+node_modules
+
+# Build output
+.next
+out
+build
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Tests
+coverage
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Documentation
+README.md
+CHANGELOG.md
+docs
+
+# TypeScript
+*.tsbuildinfo
+
+# Storybook
+.storybook
+storybook-static
+
+# Amplify (no longer needed)
+amplify
+amplify.yml

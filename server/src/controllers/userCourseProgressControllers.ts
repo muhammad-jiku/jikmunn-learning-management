@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getAuth } from '@clerk/express';
 import { Request, Response } from 'express';
+import logger from '../config/logger';
 import Course from '../models/courseModel';
 import UserCourseProgress from '../models/userCourseProgressModel';
 import { calculateOverallProgress, mergeSections } from '../utils';
@@ -17,9 +19,7 @@ export const getUserEnrolledCourses = async (
   }
 
   try {
-    const enrolledCourses = await UserCourseProgress.query('userId')
-      .eq(userId)
-      .exec();
+    const enrolledCourses = await UserCourseProgress.find({ userId });
 
     const courseIds = enrolledCourses.map((item: any) => item.courseId);
 
@@ -32,14 +32,14 @@ export const getUserEnrolledCourses = async (
       return;
     }
 
-    const courses = await Course.batchGet(courseIds);
+    const courses = await Course.find({ courseId: { $in: courseIds } });
 
     res.status(200).json({
       message: 'Enrolled courses retrieved successfully',
       data: courses,
     });
   } catch (error) {
-    console.log('Error fetching enrolled courses:', error);
+    logger.error('Error fetching enrolled courses', { userId, error });
     res.status(500).json({
       message: 'Error retrieving enrolled courses',
       error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -54,7 +54,7 @@ export const getUserCourseProgress = async (
   const { userId, courseId } = req.params;
 
   try {
-    const progress = await UserCourseProgress.get({ userId, courseId });
+    const progress = await UserCourseProgress.findOne({ userId, courseId });
     if (!progress) {
       res
         .status(404)
@@ -67,7 +67,7 @@ export const getUserCourseProgress = async (
       data: progress,
     });
   } catch (error) {
-    console.log('Error fetching course progress:', error);
+    logger.error('Error fetching course progress', { userId, courseId, error });
     res.status(500).json({
       message: 'Error retrieving user course progress',
       error: error instanceof Error ? error.message : 'Unknown error occurred',
@@ -81,31 +81,14 @@ export const updateUserCourseProgress = async (
 ): Promise<void> => {
   const { userId, courseId } = req.params;
 
-  // ✅ ADD: Lambda body parsing
-  let requestBody = req.body;
-  if (Buffer.isBuffer(req.body)) {
-    try {
-      requestBody = JSON.parse(req.body.toString());
-    } catch (parseError) {
-      console.log(
-        '❌ Error parsing progress update Buffer to JSON:',
-        parseError
-      );
-      res.status(400).json({
-        message: 'Invalid JSON body',
-      });
-      return;
-    }
-  }
-
-  const progressData = requestBody;
+  const progressData = req.body;
 
   try {
-    let progress = await UserCourseProgress.get({ userId, courseId });
+    let progress = await UserCourseProgress.findOne({ userId, courseId });
 
     if (!progress) {
       // If no progress exists, create initial progress
-      const course = await Course.get(courseId);
+      const course = await Course.findOne({ courseId });
       if (!course) {
         res.status(404).json({ message: 'Course not found' });
         return;
@@ -142,7 +125,7 @@ export const updateUserCourseProgress = async (
       data: progress,
     });
   } catch (error) {
-    console.log('Error updating progress:', error);
+    logger.error('Error updating progress', { userId, courseId, error });
     res.status(500).json({
       message: 'Error updating user course progress',
       error: error instanceof Error ? error.message : 'Unknown error occurred',

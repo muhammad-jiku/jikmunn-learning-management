@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "name": "jikmunn-lms-api",
+  "builds": [
+    {
+      "src": "src/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/index.ts",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization"
+      }
+    }
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb-uri",
+    "CLOUDINARY_CLOUD_NAME": "@cloudinary-cloud-name",
+    "CLOUDINARY_API_KEY": "@cloudinary-api-key",
+    "CLOUDINARY_API_SECRET": "@cloudinary-api-secret",
+    "CLERK_SECRET_KEY": "@clerk-secret-key",
+    "STRIPE_SECRET_KEY": "@stripe-secret-key"
+  }
+}

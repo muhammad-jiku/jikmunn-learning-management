@@ -8,25 +8,21 @@ import SectionModal from '@/components/modal/SectionModal';
 import Header from '@/components/shared/Header';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
+import { uploadToCloudinary, validateImageFile } from '@/lib/cloudinary';
 import { courseSchema } from '@/lib/schemas';
-import
-  {
-    centsToDollars,
-    createCourseFormData,
-    uploadAllVideos,
-  } from '@/lib/utils';
+import { centsToDollars, createCourseFormData } from '@/lib/utils';
 import { openSectionModal, setSections } from '@/state';
-import
-  {
-    useGetCourseQuery,
-    useGetUploadVideoUrlMutation,
-    useUpdateCourseMutation,
-  } from '@/state/api';
+import {
+  useGetCourseQuery,
+  useGetUploadImageSignatureMutation,
+  useUpdateCourseMutation,
+} from '@/state/api';
 import { useAppDispatch, useAppSelector } from '@/state/redux';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { ArrowLeft, ImagePlus, Loader2, Plus, X } from 'lucide-react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -38,10 +34,14 @@ const CourseEditor = () => {
   const { data: course, isLoading, refetch } = useGetCourseQuery(id);
 
   const [updateCourse] = useUpdateCourseMutation();
-  const [getUploadVideoUrl] = useGetUploadVideoUrlMutation();
+  const [getUploadSignature] = useGetUploadImageSignatureMutation();
 
   const dispatch = useAppDispatch();
   const { sections } = useAppSelector((state) => state.global.courseEditor);
+
+  const [courseImage, setCourseImage] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const methods = useForm<CourseFormData>({
     resolver: zodResolver(courseSchema),
@@ -64,58 +64,63 @@ const CourseEditor = () => {
         courseStatus: course.status === 'Published',
       });
       dispatch(setSections(course.sections || []));
+      setCourseImage(course.image || '');
     }
   }, [course, methods]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      validateImageFile(file, 10);
+      setIsUploading(true);
+
+      // Get upload signature from server
+      const signatureData = await getUploadSignature(id).unwrap();
+
+      // Upload to Cloudinary
+      const imageUrl = await uploadToCloudinary(file, signatureData);
+      setCourseImage(imageUrl);
+      toast.success('Image uploaded successfully');
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to upload image'
+      );
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setCourseImage('');
+  };
+
   const onSubmit = async (data: CourseFormData) => {
     try {
-      // console.log('🚀 STARTING course update - Course ID:', id);
-
-      let updatedSections = sections;
-
-      try {
-        // console.log('📤 Starting video uploads...');
-        const uploadResult = await uploadAllVideos(
-          sections,
-          id,
-          getUploadVideoUrl
-        );
-        // console.log('✅ Video uploads completed');
-
-        // Update global state with the new sections containing video URLs
-        dispatch(setSections(uploadResult));
-        updatedSections = uploadResult; // Use the uploaded result
-      } catch (uploadError) {
-        // console.log('❌ Video upload failed:', uploadError);
-        // Keep original sections if upload fails
-        updatedSections = sections;
-      }
-
-      // Final validation to ensure data consistency
-      const validatedSections = updatedSections.map((section) => ({
+      // Validate sections - ensure chapter types are consistent
+      const validatedSections = sections.map((section) => ({
         ...section,
         chapters: section.chapters.map((chapter) => {
-          // If video exists and is a string, ensure type is Video
-          // If no video, ensure type is Text
-          const hasVideo =
-            typeof chapter.video === 'string' && chapter.video.trim() !== '';
+          const hasYouTubeVideo =
+            typeof chapter.youtubeVideoId === 'string' &&
+            chapter.youtubeVideoId.trim() !== '';
 
           return {
             ...chapter,
-            video: typeof chapter.video === 'string' ? chapter.video : '',
-            type: hasVideo ? ('Video' as const) : ('Text' as const),
+            type: hasYouTubeVideo ? ('Video' as const) : ('Text' as const),
           };
         }),
       }));
 
-      // console.log(
-      //   '📋 Final validated sections to save:',
-      //   JSON.stringify(validatedSections, null, 2)
-      // );
-
       const formData = createCourseFormData(data, validatedSections);
 
-      // console.log('📨 Sending course update to server...');
+      // Include the uploaded image URL
+      if (courseImage) {
+        formData.append('image', courseImage);
+      }
+
       const result = await updateCourse({
         courseId: id,
         formData,
@@ -125,7 +130,6 @@ const CourseEditor = () => {
       toast.success('Course updated successfully');
       refetch();
     } catch (error) {
-      // console.log('💥 Course update failed:', error);
       toast.error('Failed to update course');
     }
   };
@@ -211,7 +215,7 @@ const CourseEditor = () => {
                     { value: 'science', label: 'Science' },
                     { value: 'mathematics', label: 'Mathematics' },
                     {
-                      value: 'Artificial Intelligence',
+                      value: 'artificial-intelligence',
                       label: 'Artificial Intelligence',
                     },
                   ]}
@@ -225,6 +229,61 @@ const CourseEditor = () => {
                   placeholder='0'
                   initialValue={course?.price}
                 />
+
+                {/* Course Image Upload */}
+                <div className='space-y-2'>
+                  <label className='text-customgreys-dirty-grey text-sm'>
+                    Course Image
+                  </label>
+                  {courseImage ? (
+                    <div className='relative aspect-video w-full max-w-md overflow-hidden rounded-lg border border-customgreys-dark-grey'>
+                      <Image
+                        src={courseImage}
+                        alt='Course image'
+                        fill
+                        className='object-cover'
+                      />
+                      <button
+                        type='button'
+                        onClick={handleRemoveImage}
+                        className='absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white hover:bg-black/80'
+                      >
+                        <X className='h-4 w-4' />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className='flex aspect-video w-full max-w-md cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-customgreys-dirty-grey bg-customgreys-dark-grey transition-colors hover:border-primary-700'
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className='h-8 w-8 animate-spin text-primary-700' />
+                          <span className='text-sm text-customgreys-dirty-grey'>
+                            Uploading...
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <ImagePlus className='h-8 w-8 text-customgreys-dirty-grey' />
+                          <span className='text-sm text-customgreys-dirty-grey'>
+                            Click to upload course image
+                          </span>
+                          <span className='text-xs text-customgreys-dirty-grey'>
+                            JPEG, PNG, GIF, WebP (max 10MB)
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type='file'
+                    accept='image/jpeg,image/png,image/gif,image/webp'
+                    onChange={handleImageUpload}
+                    className='hidden'
+                  />
+                </div>
               </div>
             </div>
 

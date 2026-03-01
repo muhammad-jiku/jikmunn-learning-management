@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs */
 'use client';
 
 import { combineReducers, configureStore } from '@reduxjs/toolkit';

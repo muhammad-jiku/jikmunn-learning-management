@@ -6,7 +6,7 @@ import Loading from '@/components/shared/Loading';
 import { useGetCoursesQuery } from '@/state/api';
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 const Search = () => {
   const searchParams = useSearchParams();
@@ -14,25 +14,21 @@ const Search = () => {
 
   const { data: courses, isLoading, isError } = useGetCoursesQuery({});
 
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    if (courses) {
-      if (id) {
-        const course = courses.find((c) => c.courseId === id);
-        setSelectedCourse(course || courses[0]);
-      } else {
-        setSelectedCourse(courses[0]);
-      }
+  const selectedCourse = useMemo(() => {
+    if (!courses) return null;
+    if (id) {
+      const course = courses.find((c) => c.courseId === id);
+      return course || courses[0];
     }
+    return courses[0];
   }, [courses, id]);
 
   if (isLoading) return <Loading />;
   if (isError || !courses) return <div>Failed to fetch courses</div>;
 
   const handleCourseSelect = (course: Course) => {
-    setSelectedCourse(course);
     router.push(`/search?id=${course.courseId}`, {
       scroll: false,
     });
@@ -53,7 +49,7 @@ const Search = () => {
       // className='flex flex-col bg-customgreys-dark-grey h-full mx-auto w-3/4 p-4 rounded-lg'
     >
       <h1 className='search__title'>List of available courses</h1>
-      <h2 className='search__subtitle'>{courses.length} courses avaiable</h2>
+      <h2 className='search__subtitle'>{courses.length} courses available</h2>
       <div className='search__content'>
         <motion.div
           initial={{ y: 40, opacity: 0 }}

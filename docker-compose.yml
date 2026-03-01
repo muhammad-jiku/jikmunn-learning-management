@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7
+    container_name: lms-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: lms
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    ports:
+      - "27017:27017"
+    networks:
+      - lms-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Backend API Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: lms-server
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 8000
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongo:27017/lms?authSource=admin
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    ports:
+      - "8000:8000"
+    networks:
+      - lms-network
+
+  # Frontend Next.js App
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: lms-client
+    restart: unless-stopped
+    depends_on:
+      - server
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: http://server:8000
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+    ports:
+      - "3000:3000"
+    networks:
+      - lms-network
+
+volumes:
+  mongo_data:
+  mongo_config:
+
+networks:
+  lms-network:
+    driver: bridge

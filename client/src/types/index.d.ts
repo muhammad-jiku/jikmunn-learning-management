@@ -40,10 +40,28 @@ declare global {
     };
   }
 
+  interface Review {
+    reviewId: string;
+    courseId: string;
+    userId: string;
+    userName: string;
+    rating: number;
+    comment?: string;
+    helpful: number;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  interface CourseRatingSummary {
+    averageRating: number;
+    reviewCount: number;
+  }
+
   interface Course {
     courseId: string;
     teacherId: string;
     teacherName: string;
+    teacherBio?: string;
     title: string;
     description?: string;
     category: string;
@@ -55,6 +73,8 @@ declare global {
     enrollments?: Array<{
       userId: string;
     }>;
+    averageRating?: number;
+    reviewCount?: number;
   }
 
   interface Transaction {
@@ -105,18 +125,53 @@ declare global {
     timestamp: string;
   }
 
+  interface ChapterComment extends Comment {
+    userName: string;
+  }
+
+  interface QuizQuestion {
+    questionId: string;
+    text: string;
+    type: 'multiple-choice' | 'true-false';
+    options: string[];
+    correctAnswer: string;
+    points: number;
+  }
+
+  interface Quiz {
+    quizId: string;
+    title: string;
+    questions: QuizQuestion[];
+    passingScore: number;
+    timeLimit?: number;
+  }
+
+  interface QuizAttempt {
+    quizId: string;
+    score: number;
+    totalPoints: number;
+    percentage: number;
+    passed: boolean;
+    answers: Record<string, string>;
+    submittedAt: string;
+  }
+
   interface Chapter {
     chapterId: string;
     title: string;
     content: string;
-    video?: string | File;
+    video?: string;
+    youtubeVideoId?: string;
     freePreview?: boolean;
     type: 'Text' | 'Quiz' | 'Video';
+    quiz?: Quiz;
   }
 
   interface ChapterProgress {
     chapterId: string;
     completed: boolean;
+    quizScore?: number;
+    quizPassed?: boolean;
   }
 
   interface SectionProgress {

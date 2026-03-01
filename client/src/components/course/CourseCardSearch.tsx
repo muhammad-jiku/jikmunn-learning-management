@@ -1,5 +1,6 @@
 import { formatPrice } from '@/lib/utils';
 import Image from 'next/image';
+import CourseRatingBadge from './CourseRatingBadge';
 
 const CourseCardSearch = ({
   course,
@@ -34,6 +35,7 @@ const CourseCardSearch = ({
         </div>
         <div className='mt-2'>
           <p className='course-card-search__teacher'>By {course.teacherName}</p>
+          <CourseRatingBadge courseId={course.courseId} />
           <div className='course-card-search__footer'>
             <span className='course-card-search__price'>
               {formatPrice(course.price)}

@@ -1,39 +1,56 @@
-# Use the AWS Lambda Node.js 20 base image
-FROM public.ecr.aws/lambda/nodejs:20 AS build
+# Build stage
+FROM node:20-alpine AS build
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package files
 COPY package*.json ./
 
 # Install dependencies (including dev dependencies for building)
-RUN npm install
+RUN npm ci
 
-# Copy the rest of your application's source code
+# Copy source code
 COPY . .
 
-# Build TypeScript files
+# Build TypeScript
 RUN npm run build
 
-# Remove dev dependencies
-RUN npm prune --production
+# Production stage
+FROM node:20-alpine AS production
 
-# Use a second stage to prepare the production image
-FROM public.ecr.aws/lambda/nodejs:20
+# Set working directory
+WORKDIR /app
 
-# Set the working directory
-WORKDIR ${LAMBDA_TASK_ROOT}
+# Copy package files
+COPY package*.json ./
 
-# Copy built JavaScript files and node_modules from the build stage
-COPY --from=build /app/dist ${LAMBDA_TASK_ROOT}
-COPY --from=build /app/node_modules ${LAMBDA_TASK_ROOT}/node_modules
+# Install production dependencies only
+RUN npm ci --only=production
 
-# Copy package.json (optional)
-COPY --from=build /app/package*.json ${LAMBDA_TASK_ROOT}
+# Copy built files from build stage
+COPY --from=build /app/dist ./dist
 
-# Set environment variables (adjust as needed)
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Change ownership
+RUN chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
+
+# Set environment variables
 ENV NODE_ENV=production
+ENV PORT=8000
 
-# Command to start the Lambda function
-CMD ["index.handler"]
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1
+
+# Start the server
+CMD ["node", "dist/index.js"]

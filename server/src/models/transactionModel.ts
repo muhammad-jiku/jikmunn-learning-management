@@ -1,45 +1,60 @@
-import { Schema, model } from 'dynamoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-const transactionSchema = new Schema(
+export interface ITransaction extends Document {
+  transactionId: string;
+  userId: string;
+  courseId: string;
+  amount: number;
+  paymentProvider: 'stripe';
+  dateTime: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const transactionSchema = new Schema<ITransaction>(
   {
-    userId: {
-      type: String,
-      hashKey: true,
-      required: true,
-    },
     transactionId: {
       type: String,
-      rangeKey: true,
       required: true,
+      unique: true,
+      index: true,
     },
-    dateTime: {
+    userId: {
       type: String,
       required: true,
+      index: true,
     },
     courseId: {
       type: String,
       required: true,
-      index: {
-        name: 'CourseTransactionsIndex',
-        type: 'global',
-      },
-    },
-    paymentProvider: {
-      type: String,
-      enum: ['stripe'],
-      required: true,
+      index: true,
     },
     amount: {
       type: Number,
       default: 0,
     },
+    paymentProvider: {
+      type: String,
+      enum: ['stripe'],
+      required: true,
+      default: 'stripe',
+    },
+    dateTime: {
+      type: String,
+      required: true,
+    },
   },
   {
-    saveUnknown: true,
     timestamps: true,
   }
 );
 
-const Transaction = model('Transaction', transactionSchema);
+// Composite index for user's transactions sorted by date
+transactionSchema.index({ userId: 1, dateTime: -1 });
+
+const Transaction = mongoose.model<ITransaction>(
+  'Transaction',
+  transactionSchema
+);
 
 export default Transaction;

@@ -10,11 +10,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { ChapterFormData, chapterSchema } from '@/lib/schemas';
+import { extractYouTubeId, isValidYouTubeInput } from '@/lib/utils';
 import { addChapter, closeChapterModal, editChapter } from '@/state';
 import { useAppDispatch, useAppSelector } from '@/state/redux';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X } from 'lucide-react';
+import { Eye, X, Youtube } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -39,7 +41,9 @@ const ChapterModal = () => {
     defaultValues: {
       title: '',
       content: '',
-      video: '',
+      video: '', // Legacy field
+      youtubeVideoId: '',
+      freePreview: false,
     },
   });
 
@@ -49,12 +53,16 @@ const ChapterModal = () => {
         title: chapter.title,
         content: chapter.content,
         video: chapter.video || '',
+        youtubeVideoId: chapter.youtubeVideoId || '',
+        freePreview: chapter.freePreview || false,
       });
     } else {
       methods.reset({
         title: '',
         content: '',
         video: '',
+        youtubeVideoId: '',
+        freePreview: false,
       });
     }
   }, [chapter, methods]);
@@ -66,38 +74,29 @@ const ChapterModal = () => {
   const onSubmit = (data: ChapterFormData) => {
     if (selectedSectionIndex === null) return;
 
-    // console.log('📝 Submitted data:', data);
-    // console.log('📁 File details:', {
-    //   hasVideo: !!data.video,
-    //   videoType: typeof data.video,
-    //   videoIsFile: data.video instanceof File,
-    //   videoName: data.video instanceof File ? data.video.name : 'N/A',
-    //   videoTypeProp: data.video instanceof File ? data.video.type : 'N/A',
-    //   videoSize: data.video instanceof File ? data.video.size : 'N/A',
-    // });
+    // Extract YouTube video ID if provided
+    let youtubeVideoId: string | undefined;
+    if (data.youtubeVideoId) {
+      const extractedId = extractYouTubeId(data.youtubeVideoId);
+      if (data.youtubeVideoId && !extractedId) {
+        toast.error('Invalid YouTube video ID or URL');
+        return;
+      }
+      youtubeVideoId = extractedId || undefined;
+    }
 
-    // Determine the type based on whether video is provided
-    const hasVideo =
-      data.video &&
-      (typeof data.video === 'string'
-        ? data.video.trim() !== ''
-        : data.video instanceof File);
+    // Determine the type based on whether YouTube video ID is provided
+    const hasVideo = !!youtubeVideoId;
 
     const newChapter: Chapter = {
       chapterId: chapter?.chapterId || uuidv4(),
       title: data.title,
       content: data.content,
       type: hasVideo ? 'Video' : 'Text',
-      video: data.video || '',
+      video: data.video || '', // Legacy field
+      youtubeVideoId: youtubeVideoId,
+      freePreview: data.freePreview || false,
     };
-
-    // console.log('📝 Creating/Updating chapter:', {
-    //   chapterId: newChapter.chapterId,
-    //   title: newChapter.title,
-    //   type: newChapter.type,
-    //   video: newChapter.video,
-    //   hasVideo: hasVideo,
-    // });
 
     if (selectedChapterIndex === null) {
       dispatch(
@@ -150,55 +149,43 @@ const ChapterModal = () => {
 
             <FormField
               control={methods.control}
-              name='video'
-              render={({ field: { onChange, value } }) => (
+              name='youtubeVideoId'
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel className='text-customgreys-dirty-grey text-sm'>
-                    Chapter Video
+                  <FormLabel className='text-customgreys-dirty-grey text-sm flex items-center gap-2'>
+                    <Youtube className='w-4 h-4 text-red-500' />
+                    YouTube Video (Optional)
                   </FormLabel>
                   <FormControl>
                     <div>
                       <Input
-                        type='file'
-                        accept='video/mp4,video/webm,video/ogg'
+                        {...field}
+                        type='text'
+                        placeholder='Enter YouTube URL or Video ID (e.g., dQw4w9WgXcQ)'
+                        className='border-none bg-customgreys-dark-grey py-2'
                         onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            // Enhanced validation
-                            if (file.size > 500 * 1024 * 1024) {
-                              toast.error('Video file must be less than 500MB');
-                              return;
-                            }
-                            if (!file.type.startsWith('video/')) {
-                              toast.error('Please select a valid video file');
-                              return;
-                            }
-                            if (file.size === 0) {
-                              toast.error('File appears to be empty');
-                              return;
-                            }
-
-                            // console.log('📁 File selected:', {
-                            //   name: file.name,
-                            //   type: file.type,
-                            //   size: file.size,
-                            // });
-
-                            onChange(file);
-                          }
+                          field.onChange(e.target.value);
                         }}
-                        className='border-none bg-customgreys-dark-grey py-2 cursor-pointer'
                       />
-                      {typeof value === 'string' && value && (
-                        <div className='my-2 text-sm text-gray-600'>
-                          Current video: {value.split('/').pop()}
+                      {field.value && isValidYouTubeInput(field.value) && (
+                        <div className='mt-3'>
+                          <p className='text-sm text-green-500 mb-2'>
+                            ✓ Valid YouTube video detected
+                          </p>
+                          <div className='relative aspect-video w-full max-w-md rounded-lg overflow-hidden bg-black'>
+                            <iframe
+                              src={`https://www.youtube.com/embed/${extractYouTubeId(field.value)}`}
+                              className='absolute inset-0 w-full h-full'
+                              allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                              allowFullScreen
+                            />
+                          </div>
                         </div>
                       )}
-                      {value instanceof File && (
-                        <div className='my-2 text-sm text-white-100'>
-                          Selected: {value.name} (
-                          {(value.size / (1024 * 1024)).toFixed(2)} MB)
-                        </div>
+                      {field.value && !isValidYouTubeInput(field.value) && (
+                        <p className='mt-2 text-sm text-red-400'>
+                          Invalid YouTube URL or Video ID
+                        </p>
                       )}
                     </div>
                   </FormControl>
@@ -206,6 +193,32 @@ const ChapterModal = () => {
                 </FormItem>
               )}
             />
+            <FormField
+              control={methods.control}
+              name='freePreview'
+              render={({ field }) => (
+                <FormItem className='flex items-center justify-between rounded-lg border border-customgreys-dark-grey p-4'>
+                  <div className='flex items-center gap-2'>
+                    <Eye className='w-4 h-4 text-primary-700' />
+                    <div>
+                      <FormLabel className='text-customgreys-dirty-grey text-sm'>
+                        Free Preview
+                      </FormLabel>
+                      <p className='text-xs text-customgreys-dirty-grey'>
+                        Allow non-enrolled students to preview this chapter
+                      </p>
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
             <div className='chapter-modal__actions'>
               <Button type='button' variant='outline' onClick={onClose}>
                 Cancel
