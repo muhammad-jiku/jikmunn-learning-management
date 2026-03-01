@@ -141,3 +141,49 @@ export const updateReviewBody = z.object({
   rating: z.number().int().min(1).max(5).optional(),
   comment: z.string().max(2000).optional(),
 });
+
+// ─── Certificate Schemas ───────────────────────────────────────────────────────
+
+export const certificateIdParam = z.object({
+  certificateId: z.string().min(1, 'certificateId is required'),
+});
+
+export const generateCertificateBody = z.object({
+  courseId: z.string().min(1, 'courseId is required'),
+});
+
+// ─── Analytics Schemas ─────────────────────────────────────────────────────────
+
+export const teacherIdParam = z.object({
+  teacherId: z.string().min(1, 'teacherId is required'),
+});
+
+export const teacherCourseParams = z.object({
+  teacherId: z.string().min(1, 'teacherId is required'),
+  courseId: z.string().min(1, 'courseId is required'),
+});
+
+// ─── Notification Schemas ──────────────────────────────────────────────────────
+
+export const notificationIdParam = z.object({
+  userId: z.string().min(1, 'userId is required'),
+  notificationId: z.string().min(1, 'notificationId is required'),
+});
+
+export const sendTestEmailBody = z.object({
+  template: z
+    .enum([
+      'welcome',
+      'enrollment_confirmation',
+      'course_completion',
+      'progress_reminder',
+      'new_course',
+    ])
+    .optional(),
+  email: z.string().email().optional(),
+});
+
+export const notificationsQuery = z.object({
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(50).optional(),
+});

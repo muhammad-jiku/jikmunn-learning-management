@@ -2,6 +2,7 @@
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
+import { useGetUnreadCountQuery } from '@/state/api';
 import { UserButton, useUser } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import { Bell, BookOpen } from 'lucide-react';
@@ -13,6 +14,17 @@ const Navbar = ({ isCoursePage }: { isCoursePage: boolean }) => {
   const { user } = useUser();
   const { theme } = useTheme();
   const userRole = user?.publicMetadata?.userType as 'student' | 'teacher';
+
+  const { data: unreadData } = useGetUnreadCountQuery(user?.id ?? '', {
+    skip: !user,
+    pollingInterval: 60000, // poll every 60s for live badge
+  });
+
+  const unreadCount = unreadData?.unreadCount || 0;
+  const notificationsHref =
+    userRole === 'teacher'
+      ? '/teacher/notifications'
+      : '/student/notifications';
 
   return (
     <nav className='dashboard-navbar'>
@@ -42,10 +54,17 @@ const Navbar = ({ isCoursePage }: { isCoursePage: boolean }) => {
         <div className='dashboard-navbar__actions'>
           <ThemeToggle />
 
-          <button className='nondashboard-navbar__notification-button'>
-            <span className='nondashboard-navbar__notification-indicator'></span>
+          <Link
+            href={notificationsHref}
+            className='nondashboard-navbar__notification-button relative'
+          >
+            {unreadCount > 0 && (
+              <span className='absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-700 px-1 text-[10px] font-bold text-white'>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
             <Bell className='nondashboard-navbar__notification-icon' />
-          </button>
+          </Link>
 
           <UserButton
             appearance={{

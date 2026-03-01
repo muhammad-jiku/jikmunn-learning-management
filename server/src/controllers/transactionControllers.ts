@@ -3,9 +3,11 @@ import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import logger from '../config/logger';
+import { clerkClient } from '../index';
 import Course from '../models/courseModel';
 import Transaction from '../models/transactionModel';
 import UserCourseProgress from '../models/userCourseProgressModel';
+import { sendEnrollmentEmail } from '../services/emailService';
 
 dotenv.config();
 
@@ -161,6 +163,33 @@ export const createTransaction = async (
       amount,
       paymentProvider,
     });
+
+    // Send enrollment confirmation email (non-blocking)
+    try {
+      const user = await clerkClient.users.getUser(userId);
+      const email = user.emailAddresses[0]?.emailAddress;
+      const settings = (user.publicMetadata as any)?.settings;
+
+      if (email && settings?.emailAlerts !== false) {
+        const userName =
+          `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+          user.username ||
+          'Student';
+
+        sendEnrollmentEmail(
+          email,
+          userName,
+          course.title,
+          courseId,
+          amount || 0,
+          userId
+        ).catch((err) =>
+          logger.warn('Enrollment email failed (non-blocking)', { err })
+        );
+      }
+    } catch (emailErr) {
+      logger.warn('Could not send enrollment email', { emailErr });
+    }
 
     res.status(201).json({
       message: 'Course purchased successfully',

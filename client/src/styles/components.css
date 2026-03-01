@@ -847,3 +847,64 @@
 [data-collapsible='icon'] .group:hover .app-sidebar__logo {
   @apply brightness-75;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CERTIFICATE COMPONENTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Completion Celebration Modal */
+.completion-celebration-modal {
+  @apply border-customgreys-dirtyGrey/30 bg-customgreys-primarybg text-white-100;
+}
+
+/* Certificate Card */
+.certificate-card__header {
+  @apply min-h-[160px] border-b border-customgreys-dirtyGrey/20;
+}
+
+/* Certificates Page */
+.certificates-page__empty {
+  @apply rounded-xl border border-dashed border-customgreys-dirtyGrey/30 p-12;
+}
+
+/* Certificate Verify Page */
+.certificate-verify {
+  @apply text-center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ANALYTICS COMPONENTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Analytics Page */
+.analytics-page {
+  @apply space-y-0 px-4 py-2;
+}
+
+/* Recharts dark theme overrides */
+.analytics-page .recharts-text {
+  fill: #9ca3af;
+}
+
+.analytics-page .recharts-cartesian-grid-horizontal line,
+.analytics-page .recharts-cartesian-grid-vertical line {
+  stroke: #333;
+}
+
+.analytics-page .recharts-legend-item-text {
+  color: #9ca3af !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   NOTIFICATION COMPONENTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Notifications Page */
+.notifications-page {
+  @apply space-y-0;
+}
+
+/* Notification Badge (Navbar) */
+.notification-badge {
+  @apply absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-700 px-1 text-[10px] font-bold text-white;
+}

@@ -73,6 +73,9 @@ export const api = createApi({
     'Comments',
     'Quizzes',
     'Reviews',
+    'Certificates',
+    'Analytics',
+    'Notifications',
   ],
   endpoints: (build) => ({
     /* 
@@ -469,6 +472,122 @@ export const api = createApi({
         { type: 'Reviews', id: courseId },
       ],
     }),
+
+    /* 
+    ===============
+    CERTIFICATES
+    =============== 
+    */
+    generateCertificate: build.mutation<Certificate, { courseId: string }>({
+      query: ({ courseId }) => ({
+        url: 'certificates/generate',
+        method: 'POST',
+        body: { courseId },
+      }),
+      invalidatesTags: ['Certificates'],
+    }),
+
+    getCertificate: build.query<Certificate, string>({
+      query: (certificateId) => `certificates/${certificateId}`,
+      providesTags: (result, error, id) => [{ type: 'Certificates', id }],
+    }),
+
+    verifyCertificate: build.query<
+      {
+        valid: boolean;
+        data?: {
+          certificateId: string;
+          courseName: string;
+          userName: string;
+          issuedAt: string;
+          verificationUrl: string;
+        };
+      },
+      string
+    >({
+      query: (certificateId) => `certificates/verify/${certificateId}`,
+    }),
+
+    getUserCertificates: build.query<Certificate[], string>({
+      query: (userId) => `certificates/users/${userId}`,
+      providesTags: ['Certificates'],
+    }),
+
+    /* 
+    ===============
+    ANALYTICS
+    =============== 
+    */
+    getTeacherOverview: build.query<TeacherOverviewAnalytics, string>({
+      query: (teacherId) => `analytics/teacher/${teacherId}/overview`,
+      providesTags: ['Analytics'],
+    }),
+
+    getTeacherCourseAnalytics: build.query<
+      TeacherCourseAnalytics,
+      { teacherId: string; courseId: string }
+    >({
+      query: ({ teacherId, courseId }) =>
+        `analytics/teacher/${teacherId}/courses/${courseId}`,
+      providesTags: (result, error, { courseId }) => [
+        { type: 'Analytics', id: courseId },
+      ],
+    }),
+
+    getStudentAnalytics: build.query<StudentAnalytics, string>({
+      query: (userId) => `analytics/student/${userId}`,
+      providesTags: ['Analytics'],
+    }),
+
+    /* 
+    ===============
+    NOTIFICATIONS
+    =============== 
+    */
+    getNotifications: build.query<
+      NotificationsResponse,
+      { userId: string; page?: number; limit?: number }
+    >({
+      query: ({ userId, page = 1, limit = 20 }) =>
+        `notifications/${userId}?page=${page}&limit=${limit}`,
+      providesTags: ['Notifications'],
+    }),
+
+    getUnreadCount: build.query<UnreadCountResponse, string>({
+      query: (userId) => `notifications/${userId}/unread-count`,
+      providesTags: ['Notifications'],
+    }),
+
+    markNotificationRead: build.mutation<
+      Notification,
+      { userId: string; notificationId: string }
+    >({
+      query: ({ userId, notificationId }) => ({
+        url: `notifications/${userId}/${notificationId}/read`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Notifications'],
+    }),
+
+    markAllNotificationsRead: build.mutation<void, string>({
+      query: (userId) => ({
+        url: `notifications/${userId}/read-all`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Notifications'],
+    }),
+
+    sendTestEmail: build.mutation<
+      { sent: boolean },
+      { userId: string; template?: string; email?: string }
+    >({
+      query: ({ userId, ...body }) => ({
+        url: `notifications/${userId}/test`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Notifications'],
+    }),
   }),
 });
 
@@ -500,4 +619,16 @@ export const {
   useUpdateReviewMutation,
   useDeleteReviewMutation,
   useMarkReviewHelpfulMutation,
+  useGenerateCertificateMutation,
+  useGetCertificateQuery,
+  useVerifyCertificateQuery,
+  useGetUserCertificatesQuery,
+  useGetTeacherOverviewQuery,
+  useGetTeacherCourseAnalyticsQuery,
+  useGetStudentAnalyticsQuery,
+  useGetNotificationsQuery,
+  useGetUnreadCountQuery,
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
+  useSendTestEmailMutation,
 } = api;

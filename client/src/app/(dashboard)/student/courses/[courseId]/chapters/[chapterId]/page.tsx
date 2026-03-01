@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
+import CompletionCelebrationModal from '@/components/certificate/CompletionCelebrationModal';
 import CourseReviews from '@/components/course/CourseReviews';
 import QuizPlayer from '@/components/quiz/QuizPlayer';
 import Loading from '@/components/shared/Loading';
@@ -41,6 +42,7 @@ const Course = () => {
 
   const playerRef = useRef<any>(null);
   const [commentText, setCommentText] = useState('');
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Comment queries
   const { data: comments = [] } = useGetChapterCommentsQuery(
@@ -76,6 +78,22 @@ const Course = () => {
         currentChapter.chapterId,
         true
       );
+
+      // Check if this completion makes overall progress 100%
+      if (userProgress && course) {
+        const totalChapters = course.sections.reduce(
+          (sum, s) => sum + s.chapters.length,
+          0
+        );
+        const completedChapters = userProgress.sections.reduce(
+          (sum, s) => sum + s.chapters.filter((c) => c.completed).length,
+          0
+        );
+        // +1 for the chapter just marked complete
+        if (completedChapters + 1 >= totalChapters && totalChapters > 0) {
+          setShowCelebration(true);
+        }
+      }
     }
   };
 
@@ -128,6 +146,12 @@ const Course = () => {
 
   return (
     <div className='course'>
+      <CompletionCelebrationModal
+        isOpen={showCelebration}
+        onClose={() => setShowCelebration(false)}
+        courseId={course.courseId}
+        courseName={course.title}
+      />
       <div className='course__container'>
         <div className='course__breadcrumb'>
           <div className='course__path'>

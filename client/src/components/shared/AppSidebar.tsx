@@ -11,6 +11,9 @@ import {
 import { cn } from '@/lib/utils';
 import { useClerk, useUser } from '@clerk/nextjs';
 import {
+  Award,
+  BarChart3,
+  Bell,
   BookOpen,
   Briefcase,
   DollarSign,
@@ -33,12 +36,17 @@ const AppSidebar = () => {
   const navLinks = {
     student: [
       { icon: BookOpen, label: 'Courses', href: '/student/courses' },
+      { icon: BarChart3, label: 'Analytics', href: '/student/analytics' },
+      { icon: Bell, label: 'Notifications', href: '/student/notifications' },
+      { icon: Award, label: 'Certificates', href: '/student/certificates' },
       { icon: Briefcase, label: 'Billing', href: '/student/billing' },
       { icon: User, label: 'Profile', href: '/student/profile' },
       { icon: Settings, label: 'Settings', href: '/student/settings' },
     ],
     teacher: [
       { icon: BookOpen, label: 'Courses', href: '/teacher/courses' },
+      { icon: BarChart3, label: 'Analytics', href: '/teacher/analytics' },
+      { icon: Bell, label: 'Notifications', href: '/teacher/notifications' },
       { icon: DollarSign, label: 'Billing', href: '/teacher/billing' },
       { icon: User, label: 'Profile', href: '/teacher/profile' },
       { icon: Settings, label: 'Settings', href: '/teacher/settings' },

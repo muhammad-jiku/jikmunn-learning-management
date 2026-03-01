@@ -57,6 +57,18 @@ declare global {
     reviewCount: number;
   }
 
+  interface Certificate {
+    certificateId: string;
+    userId: string;
+    courseId: string;
+    courseName: string;
+    userName: string;
+    issuedAt: string;
+    verificationUrl: string;
+    createdAt?: string;
+    updatedAt?: string;
+  }
+
   interface Course {
     courseId: string;
     teacherId: string;
@@ -265,6 +277,125 @@ declare global {
     courseCategory: string;
     coursePrice: string;
     courseStatus: boolean;
+  }
+
+  // ─── Analytics Types ───────────────────────────────────────────────────────────
+
+  interface EnrollmentTrend {
+    date: string;
+    count: number;
+  }
+
+  interface RevenueTrend {
+    date: string;
+    revenue: number;
+  }
+
+  interface CoursePerformance {
+    courseId: string;
+    title: string;
+    enrollments: number;
+    completionRate: number;
+    averageProgress: number;
+    revenue: number;
+    status: string;
+  }
+
+  interface TeacherOverviewAnalytics {
+    totalStudents: number;
+    totalRevenue: number;
+    totalCourses: number;
+    averageRating: number;
+    totalReviews: number;
+    enrollmentsTrend: EnrollmentTrend[];
+    revenueTrend: RevenueTrend[];
+    coursePerformance: CoursePerformance[];
+  }
+
+  interface ProgressDistribution {
+    range: string;
+    count: number;
+  }
+
+  interface ChapterStat {
+    chapterId: string;
+    chapterTitle: string;
+    sectionTitle: string;
+    completions: number;
+    totalStudents: number;
+  }
+
+  interface TeacherCourseAnalytics {
+    courseId: string;
+    title: string;
+    enrollments: number;
+    revenue: number;
+    completionRate: number;
+    averageProgress: number;
+    progressDistribution: ProgressDistribution[];
+    chapterStats: ChapterStat[];
+    certificatesIssued: number;
+  }
+
+  interface StudentCourseProgress {
+    courseId: string;
+    title: string;
+    category: string;
+    overallProgress: number;
+    enrollmentDate: string;
+    lastAccessedTimestamp: string;
+    hasCertificate: boolean;
+  }
+
+  interface CategoryDistribution {
+    name: string;
+    value: number;
+  }
+
+  interface StudentAnalytics {
+    totalCoursesEnrolled: number;
+    completedCourses: number;
+    inProgressCourses: number;
+    averageProgress: number;
+    totalChaptersCompleted: number;
+    totalChapters: number;
+    certificatesEarned: number;
+    courseProgress: StudentCourseProgress[];
+    recentActivityCount: number;
+    categoryDistribution: CategoryDistribution[];
+  }
+
+  // ─── Notifications ────────────────────────────────────────────────────────────
+
+  interface Notification {
+    _id: string;
+    userId: string;
+    type: string;
+    channel: 'email' | 'in_app';
+    recipient: string;
+    subject: string;
+    status: 'pending' | 'sent' | 'failed' | 'logged' | 'read';
+    error?: string;
+    externalId?: string;
+    metadata?: Record<string, unknown>;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  interface NotificationPagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  }
+
+  interface NotificationsResponse {
+    notifications: Notification[];
+    pagination: NotificationPagination;
+  }
+
+  interface UnreadCountResponse {
+    unreadCount: number;
   }
 }
 

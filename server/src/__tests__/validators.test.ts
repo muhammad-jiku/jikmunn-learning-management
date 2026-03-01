@@ -1,11 +1,18 @@
 import {
   addCommentBody,
   addReviewBody,
+  certificateIdParam,
   chapterParams,
   courseIdParam,
   createTransactionBody,
+  generateCertificateBody,
   getCourseReviewsQuery,
+  notificationIdParam,
+  notificationsQuery,
+  sendTestEmailBody,
   submitQuizBody,
+  teacherCourseParams,
+  teacherIdParam,
   updateCourseBody,
   updateReviewBody,
   updateUserBody,
@@ -213,6 +220,173 @@ describe('Server Zod Schemas', () => {
       if (result.success) {
         expect(result.data.rating).toBe(4);
       }
+    });
+  });
+
+  // ─── Certificate Schemas ──────────────────────────────────────────────────────
+
+  describe('certificateIdParam', () => {
+    it('should accept valid certificateId', () => {
+      expect(
+        certificateIdParam.safeParse({ certificateId: 'uuid-123' }).success
+      ).toBe(true);
+    });
+
+    it('should reject empty certificateId', () => {
+      expect(certificateIdParam.safeParse({ certificateId: '' }).success).toBe(
+        false
+      );
+    });
+
+    it('should reject missing certificateId', () => {
+      expect(certificateIdParam.safeParse({}).success).toBe(false);
+    });
+  });
+
+  describe('generateCertificateBody', () => {
+    it('should accept valid courseId', () => {
+      expect(
+        generateCertificateBody.safeParse({ courseId: 'course-abc' }).success
+      ).toBe(true);
+    });
+
+    it('should reject empty courseId', () => {
+      expect(generateCertificateBody.safeParse({ courseId: '' }).success).toBe(
+        false
+      );
+    });
+
+    it('should reject missing courseId', () => {
+      expect(generateCertificateBody.safeParse({}).success).toBe(false);
+    });
+  });
+
+  // ─── Analytics Schemas ──────────────────────────────────────────────────────
+
+  describe('teacherIdParam', () => {
+    it('should accept valid teacherId', () => {
+      expect(
+        teacherIdParam.safeParse({ teacherId: 'teacher-123' }).success
+      ).toBe(true);
+    });
+
+    it('should reject empty teacherId', () => {
+      expect(teacherIdParam.safeParse({ teacherId: '' }).success).toBe(false);
+    });
+
+    it('should reject missing teacherId', () => {
+      expect(teacherIdParam.safeParse({}).success).toBe(false);
+    });
+  });
+
+  describe('teacherCourseParams', () => {
+    it('should accept valid teacherId and courseId', () => {
+      const result = teacherCourseParams.safeParse({
+        teacherId: 'teacher-123',
+        courseId: 'course-abc',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject missing courseId', () => {
+      const result = teacherCourseParams.safeParse({
+        teacherId: 'teacher-123',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject missing teacherId', () => {
+      const result = teacherCourseParams.safeParse({
+        courseId: 'course-abc',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject empty strings', () => {
+      const result = teacherCourseParams.safeParse({
+        teacherId: '',
+        courseId: '',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  // ─── Notification Schemas ────────────────────────────────────────────────────
+
+  describe('notificationIdParam', () => {
+    it('should accept valid userId and notificationId', () => {
+      const result = notificationIdParam.safeParse({
+        userId: 'user-123',
+        notificationId: 'notif-abc',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject missing notificationId', () => {
+      const result = notificationIdParam.safeParse({
+        userId: 'user-123',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject empty notificationId', () => {
+      const result = notificationIdParam.safeParse({
+        userId: 'user-123',
+        notificationId: '',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('sendTestEmailBody', () => {
+    it('should accept valid template', () => {
+      expect(sendTestEmailBody.safeParse({ template: 'welcome' }).success).toBe(
+        true
+      );
+    });
+
+    it('should accept empty body (all optional)', () => {
+      expect(sendTestEmailBody.safeParse({}).success).toBe(true);
+    });
+
+    it('should reject invalid template', () => {
+      expect(
+        sendTestEmailBody.safeParse({ template: 'invalid_type' }).success
+      ).toBe(false);
+    });
+
+    it('should accept valid email', () => {
+      expect(
+        sendTestEmailBody.safeParse({ email: 'test@example.com' }).success
+      ).toBe(true);
+    });
+
+    it('should reject invalid email', () => {
+      expect(
+        sendTestEmailBody.safeParse({ email: 'not-an-email' }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('notificationsQuery', () => {
+    it('should accept valid page and limit', () => {
+      expect(
+        notificationsQuery.safeParse({ page: '1', limit: '20' }).success
+      ).toBe(true);
+    });
+
+    it('should accept empty query (all optional)', () => {
+      expect(notificationsQuery.safeParse({}).success).toBe(true);
+    });
+
+    it('should reject limit above 50', () => {
+      expect(notificationsQuery.safeParse({ limit: '100' }).success).toBe(
+        false
+      );
+    });
+
+    it('should reject page of 0', () => {
+      expect(notificationsQuery.safeParse({ page: '0' }).success).toBe(false);
     });
   });
 });

@@ -15,7 +15,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { connectDB } from './config/database';
 import logger from './config/logger';
+import analyticsRoutes from './routes/analyticsRoutes';
+import certificateRoutes from './routes/certificateRoutes';
 import courseRoutes from './routes/courseRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import userClerkRoutes from './routes/userClerkRoutes';
@@ -127,6 +130,9 @@ app.get('/health', (req, res) => {
 
 app.use('/courses', courseRoutes);
 app.use('/reviews', reviewRoutes);
+app.use('/certificates', certificateRoutes);
+app.use('/analytics', requireAuth(), analyticsRoutes);
+app.use('/notifications', notificationRoutes);
 app.use('/users/clerk', authLimiter, requireAuth(), userClerkRoutes);
 app.use('/transactions', authLimiter, requireAuth(), transactionRoutes);
 app.use('/users/course-progress', requireAuth(), userCourseProgressRoutes);
