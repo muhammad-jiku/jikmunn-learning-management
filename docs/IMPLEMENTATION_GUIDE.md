@@ -164,14 +164,14 @@ client/
 # Sign up at mongodb.com/atlas
 # Create a free M0 cluster
 # Get connection string:
-# mongodb+srv://<username>:<password>@cluster.xxxxx.mongodb.net/<dbname>
+# mongodb+srv://<username>:<password>@<your-cluster>.mongodb.net/<dbname>
 ```
 
 **2. Update Environment Variables**
 
 ```env
 # server/.env
-MONGODB_URI=mongodb+srv://username:password@cluster.xxxxx.mongodb.net/learning_management?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://<your-username>:<your-password>@<your-cluster>.mongodb.net/<database>?retryWrites=true&w=majority
 ```
 
 **3. Install Mongoose**
