@@ -11,11 +11,11 @@ This guide provides step-by-step instructions for running the Learning Managemen
 
 The Docker setup includes three services:
 
-| Service | Container Name | Port | Description |
-|---------|---------------|------|-------------|
-| MongoDB | lms-mongo | 27017 | Database |
-| Server | lms-server | 8000 | Backend API (Express) |
-| Client | lms-client | 3000 | Frontend (Next.js) |
+| Service | Container Name | Port  | Description           |
+| ------- | -------------- | ----- | --------------------- |
+| MongoDB | lms-mongo      | 27017 | Database              |
+| Server  | lms-server     | 8000  | Backend API (Express) |
+| Client  | lms-client     | 3000  | Frontend (Next.js)    |
 
 ## Step 1: Create Environment File
 
@@ -81,6 +81,7 @@ docker-compose up -d
 ```
 
 This will:
+
 1. Start MongoDB and wait for it to be healthy
 2. Start the backend server (depends on MongoDB)
 3. Start the frontend client (depends on server)
@@ -94,6 +95,7 @@ docker-compose ps
 ```
 
 Expected output:
+
 ```
 NAME          STATUS                   PORTS
 lms-mongo     Up (healthy)             0.0.0.0:27017->27017/tcp
@@ -115,11 +117,11 @@ docker-compose logs -f mongo
 
 ## Step 5: Access the Application
 
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:3000 |
-| Backend API | http://localhost:8000 |
-| MongoDB | mongodb://localhost:27017 |
+| Service     | URL                       |
+| ----------- | ------------------------- |
+| Frontend    | http://localhost:3000     |
+| Backend API | http://localhost:8000     |
+| MongoDB     | mongodb://localhost:27017 |
 
 ## Step 6: Seed Database (Optional)
 
@@ -193,21 +195,24 @@ docker-compose up -d --build
 ### Container Won't Start
 
 1. Check logs for errors:
+
    ```bash
    docker-compose logs server
    ```
 
 2. Verify environment variables are set:
+
    ```bash
    docker-compose config
    ```
 
 3. Ensure ports aren't in use:
+
    ```bash
    # Windows
    netstat -ano | findstr :3000
    netstat -ano | findstr :8000
-   
+
    # Linux/Mac
    lsof -i :3000
    lsof -i :8000
@@ -216,6 +221,7 @@ docker-compose up -d --build
 ### MongoDB Connection Issues
 
 1. Check MongoDB is healthy:
+
    ```bash
    docker-compose ps mongo
    ```
@@ -231,11 +237,13 @@ docker-compose up -d --build
 ### Build Failures
 
 1. Clear Docker cache and rebuild:
+
    ```bash
    docker-compose build --no-cache
    ```
 
 2. Ensure you have enough disk space:
+
    ```bash
    docker system df
    ```
@@ -276,15 +284,15 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'
 ```
 
 ## Development vs Docker
 
-| Scenario | Command |
-|----------|---------|
-| Local development with hot reload | `npm run dev` |
-| Test production build locally | `docker-compose up` |
-| CI/CD testing | `docker-compose up -d` |
-| Production deployment | `docker-compose -f docker-compose.prod.yml up -d` |
+| Scenario                          | Command                                           |
+| --------------------------------- | ------------------------------------------------- |
+| Local development with hot reload | `npm run dev`                                     |
+| Test production build locally     | `docker-compose up`                               |
+| CI/CD testing                     | `docker-compose up -d`                            |
+| Production deployment             | `docker-compose -f docker-compose.prod.yml up -d` |

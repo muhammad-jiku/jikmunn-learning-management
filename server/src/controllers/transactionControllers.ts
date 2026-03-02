@@ -8,6 +8,7 @@ import Course from '../models/courseModel';
 import Transaction from '../models/transactionModel';
 import UserCourseProgress from '../models/userCourseProgressModel';
 import { sendEnrollmentEmail } from '../services/emailService';
+import { applyCouponUsage } from './couponControllers';
 
 dotenv.config();
 
@@ -82,7 +83,14 @@ export const createTransaction = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { userId, courseId, transactionId, amount, paymentProvider } = req.body;
+  const {
+    userId,
+    courseId,
+    transactionId,
+    amount,
+    paymentProvider,
+    couponCode,
+  } = req.body;
 
   // console.log('🔍 Transaction creation request:', requestBody);
 
@@ -156,12 +164,29 @@ export const createTransaction = async (
       await course.save();
     }
 
+    // 5. Apply coupon usage if provided
+    if (couponCode) {
+      try {
+        await applyCouponUsage(couponCode);
+        logger.info('Coupon applied to transaction', {
+          couponCode,
+          transactionId,
+        });
+      } catch (couponErr) {
+        logger.warn('Failed to apply coupon usage (non-blocking)', {
+          couponCode,
+          couponErr,
+        });
+      }
+    }
+
     logger.info('AUDIT: Course purchased', {
       userId,
       courseId,
       transactionId,
       amount,
       paymentProvider,
+      couponCode: couponCode || null,
     });
 
     // Send enrollment confirmation email (non-blocking)

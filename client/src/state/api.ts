@@ -76,6 +76,8 @@ export const api = createApi({
     'Certificates',
     'Analytics',
     'Notifications',
+    'Coupons',
+    'Discussions',
   ],
   endpoints: (build) => ({
     /* 
@@ -237,7 +239,10 @@ export const api = createApi({
       }),
     }),
 
-    createTransaction: build.mutation<Transaction, Partial<Transaction>>({
+    createTransaction: build.mutation<
+      Transaction,
+      Partial<Transaction> & { couponCode?: string }
+    >({
       query: (transaction) => ({
         url: 'transactions',
         method: 'POST',
@@ -588,6 +593,163 @@ export const api = createApi({
       }),
       invalidatesTags: ['Notifications'],
     }),
+
+    /* 
+    ===============
+    COUPONS
+    =============== 
+    */
+    validateCoupon: build.query<
+      CouponValidationResult,
+      { code: string; courseId?: string; amount?: number }
+    >({
+      query: ({ code, courseId, amount }) => ({
+        url: `coupons/validate/${code}`,
+        params: { ...(courseId && { courseId }), ...(amount && { amount }) },
+      }),
+    }),
+
+    getTeacherCoupons: build.query<Coupon[], string>({
+      query: (teacherId) => `coupons/teacher/${teacherId}`,
+      providesTags: ['Coupons'],
+    }),
+
+    createCoupon: build.mutation<
+      Coupon,
+      {
+        code: string;
+        discountType: 'percentage' | 'fixed';
+        discountValue: number;
+        validFrom: string;
+        validUntil: string;
+        usageLimit?: number;
+        courseIds?: string[];
+        minPurchase?: number;
+        createdBy: string;
+      }
+    >({
+      query: (body) => ({
+        url: 'coupons',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Coupons'],
+    }),
+
+    updateCoupon: build.mutation<
+      Coupon,
+      { couponId: string; data: Partial<Coupon> }
+    >({
+      query: ({ couponId, data }) => ({
+        url: `coupons/${couponId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Coupons'],
+    }),
+
+    deactivateCoupon: build.mutation<Coupon, string>({
+      query: (couponId) => ({
+        url: `coupons/${couponId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Coupons'],
+    }),
+
+    /* 
+    ===============
+    DISCUSSIONS
+    =============== 
+    */
+    getDiscussions: build.query<
+      Discussion[],
+      {
+        courseId: string;
+        chapterId?: string;
+        search?: string;
+        sort?: string;
+        page?: number;
+        limit?: number;
+      }
+    >({
+      query: ({ courseId, ...params }) => ({
+        url: `discussions/course/${courseId}`,
+        params,
+      }),
+      providesTags: ['Discussions'],
+    }),
+
+    getDiscussion: build.query<DiscussionWithReplies, string>({
+      query: (discussionId) => `discussions/${discussionId}`,
+      providesTags: (result, error, id) => [{ type: 'Discussions', id }],
+    }),
+
+    createDiscussion: build.mutation<
+      Discussion,
+      { courseId: string; title: string; content: string; chapterId?: string }
+    >({
+      query: ({ courseId, ...body }) => ({
+        url: `discussions/course/${courseId}`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Discussions'],
+    }),
+
+    createReply: build.mutation<
+      DiscussionReply,
+      { discussionId: string; content: string }
+    >({
+      query: ({ discussionId, content }) => ({
+        url: `discussions/${discussionId}/replies`,
+        method: 'POST',
+        body: { content },
+      }),
+      invalidatesTags: (result, error, { discussionId }) => [
+        'Discussions',
+        { type: 'Discussions', id: discussionId },
+      ],
+    }),
+
+    upvoteDiscussion: build.mutation<Discussion, string>({
+      query: (discussionId) => ({
+        url: `discussions/${discussionId}/upvote`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Discussions'],
+    }),
+
+    upvoteReply: build.mutation<DiscussionReply, string>({
+      query: (replyId) => ({
+        url: `discussions/replies/${replyId}/upvote`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Discussions'],
+    }),
+
+    pinDiscussion: build.mutation<Discussion, string>({
+      query: (discussionId) => ({
+        url: `discussions/${discussionId}/pin`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Discussions'],
+    }),
+
+    deleteDiscussion: build.mutation<void, string>({
+      query: (discussionId) => ({
+        url: `discussions/${discussionId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Discussions'],
+    }),
+
+    deleteReply: build.mutation<void, string>({
+      query: (replyId) => ({
+        url: `discussions/replies/${replyId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Discussions'],
+    }),
   }),
 });
 
@@ -631,4 +793,18 @@ export const {
   useMarkNotificationReadMutation,
   useMarkAllNotificationsReadMutation,
   useSendTestEmailMutation,
+  useLazyValidateCouponQuery,
+  useGetTeacherCouponsQuery,
+  useCreateCouponMutation,
+  useUpdateCouponMutation,
+  useDeactivateCouponMutation,
+  useGetDiscussionsQuery,
+  useGetDiscussionQuery,
+  useCreateDiscussionMutation,
+  useCreateReplyMutation,
+  useUpvoteDiscussionMutation,
+  useUpvoteReplyMutation,
+  usePinDiscussionMutation,
+  useDeleteDiscussionMutation,
+  useDeleteReplyMutation,
 } = api;

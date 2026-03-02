@@ -18,8 +18,10 @@ import {
   Briefcase,
   DollarSign,
   LogOut,
+  MessageSquare,
   PanelLeft,
   Settings,
+  Tag,
   User,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -46,6 +48,12 @@ const AppSidebar = () => {
     teacher: [
       { icon: BookOpen, label: 'Courses', href: '/teacher/courses' },
       { icon: BarChart3, label: 'Analytics', href: '/teacher/analytics' },
+      {
+        icon: MessageSquare,
+        label: 'Discussions',
+        href: '/teacher/discussions',
+      },
+      { icon: Tag, label: 'Coupons', href: '/teacher/coupons' },
       { icon: Bell, label: 'Notifications', href: '/teacher/notifications' },
       { icon: DollarSign, label: 'Billing', href: '/teacher/billing' },
       { icon: User, label: 'Profile', href: '/teacher/profile' },

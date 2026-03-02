@@ -1737,178 +1737,144 @@ export const Certificate = mongoose.model<ICertificate>(
 
 ---
 
-### Phase 7: Coupon System (2 weeks)
+### Phase 7: Coupon System (2 weeks) ✅ COMPLETE
 
 **Goal:** Discount and promotional capabilities
 
-#### 7.1 Backend - Coupon Model (Mongoose)
+#### 7.1 Backend - Coupon Model ✅
 
-```typescript
-// server/src/models/couponModel.ts
-import mongoose, { Schema, Document } from 'mongoose';
+- [x] Mongoose model: `server/src/models/couponModel.ts`
+- [x] Interface: `ICoupon` with code, discountType, discountValue, validFrom, validUntil, usageLimit, usedCount, courseIds, minPurchase, createdBy, isActive
+- [x] Indexes: `{ code: 1, isActive: 1 }`, `{ createdBy: 1, createdAt: -1 }`
+- [x] Code field: unique, uppercase, trimmed
+- [x] Timestamps enabled
 
-export interface ICoupon extends Document {
-  code: string;
-  discountType: 'percentage' | 'fixed';
-  discountValue: number;
-  validFrom: Date;
-  validUntil: Date;
-  usageLimit?: number;
-  usedCount: number;
-  courseIds?: string[]; // null/empty = all courses
-  minPurchase: number;
-  createdBy: string;
-  isActive: boolean;
-}
+#### 7.2 Backend - Coupon Controllers ✅
 
-const couponSchema = new Schema(
-  {
-    code: { type: String, required: true, unique: true, uppercase: true },
-    discountType: {
-      type: String,
-      enum: ['percentage', 'fixed'],
-      required: true,
-    },
-    discountValue: { type: Number, required: true },
-    validFrom: { type: Date, required: true },
-    validUntil: { type: Date, required: true },
-    usageLimit: { type: Number },
-    usedCount: { type: Number, default: 0 },
-    courseIds: [{ type: String }],
-    minPurchase: { type: Number, default: 0 },
-    createdBy: { type: String, required: true, index: true },
-    isActive: { type: Boolean, default: true },
-  },
-  { timestamps: true }
-);
+**File:** `server/src/controllers/couponControllers.ts`
 
-// Index for validation queries
-couponSchema.index({ code: 1, isActive: 1 });
+- [x] `createCoupon` — Validates percentage ≤ 100, date ordering, duplicate codes, course ownership
+- [x] `validateCoupon` — Full validation: active check, date range, usage limit, course eligibility, min purchase, discount calculation
+- [x] `getTeacherCoupons` — List all coupons by teacher, sorted by newest
+- [x] `updateCoupon` — Partial update with validation
+- [x] `deactivateCoupon` — Soft-delete (sets isActive: false)
+- [x] `applyCouponUsage` — Atomic `$inc` on usedCount (called during transaction)
 
-export const Coupon = mongoose.model<ICoupon>('Coupon', couponSchema);
-```
+#### 7.3 Backend - Coupon Routes ✅
 
-#### 7.2 Backend - Coupon Endpoints
+**File:** `server/src/routes/couponRoutes.ts`
 
-- `POST /coupons` - Create (teacher/admin)
-- `GET /coupons/validate/:code` - Validate coupon
-- `GET /coupons/teacher/:teacherId` - Teacher's coupons
-- `DELETE /coupons/:code` - Deactivate
+- [x] `GET /coupons/validate/:code` — Public endpoint with courseId & amount query params
+- [x] `POST /coupons` — Create coupon (requireAuth)
+- [x] `GET /coupons/teacher/:teacherId` — Teacher's coupons (requireAuth)
+- [x] `PUT /coupons/:couponId` — Update coupon (requireAuth)
+- [x] `DELETE /coupons/:couponId` — Deactivate coupon (requireAuth)
+- [x] Routes registered in `server/src/index.ts`
 
-#### 7.3 Frontend - Coupon Features
+#### 7.4 Zod Validation Schemas ✅
 
-- Coupon input in checkout
-- Validation feedback
-- Price recalculation
-- Coupon management for teachers
+- [x] `createCouponBody` — Code (3-20 chars, alphanumeric+hyphens), discountType enum, discountValue, dates, optional usageLimit/courseIds/minPurchase, createdBy
+- [x] `updateCouponBody` — All fields optional with passthrough
+- [x] `validateCouponParams` — code string
+- [x] `validateCouponQuery` — optional courseId, amount (coerced int)
+- [x] `couponIdParam` — couponId string
+- [x] `createTransactionBody` — Extended with optional `couponCode` field
 
-#### 7.4 Integration
+#### 7.5 Transaction Integration ✅
 
-- Apply discount to payment intent
-- Track coupon usage in transaction
-- Update usedCount atomically
+- [x] `transactionControllers.ts` — Accepts `couponCode` in body, calls `applyCouponUsage()` atomically after successful purchase
+- [x] Non-blocking coupon usage tracking (won't fail transaction on coupon error)
+- [x] Coupon code logged in audit trail
+
+#### 7.6 Frontend — CouponInput Component ✅
+
+**File:** `client/src/components/payment/CouponInput.tsx`
+
+- [x] Coupon code input with Tag icon
+- [x] Real-time validation via `useLazyValidateCouponQuery`
+- [x] Applied state with green badge, discount display, remove button
+- [x] Error messages for all validation failure reasons
+- [x] Enter key support for applying
+
+#### 7.7 Frontend — Checkout Integration ✅
+
+- [x] `CoursePreview.tsx` — Extended with `showCouponInput`, `onCouponApplied`, `appliedDiscount` props
+- [x] Price details section shows coupon discount line and strikethrough original price
+- [x] `checkout/payment/index.tsx` — Sends discounted `finalAmount` + `couponCode` to transaction API
+- [x] Backwards-compatible: existing checkout/preview usage unaffected
+
+#### 7.8 Frontend — Teacher Coupon Management ✅
+
+**File:** `client/src/app/(dashboard)/teacher/coupons/page.tsx`
+
+- [x] Create coupon form with code, discount type/value, dates, usage limit, min purchase
+- [x] Active coupons list with status badges (Active/Scheduled/Expired/Limit Reached)
+- [x] Copy-to-clipboard for coupon codes
+- [x] Deactivate coupons with trash icon
+- [x] Inactive coupons section with usage stats
+- [x] Sidebar nav link with Tag icon
+
+#### 7.9 RTK Query Endpoints ✅
+
+- [x] `validateCoupon` — Lazy query for checkout validation
+- [x] `getTeacherCoupons` — Query with Coupons tag
+- [x] `createCoupon` — Mutation invalidating Coupons
+- [x] `updateCoupon` — Mutation invalidating Coupons
+- [x] `deactivateCoupon` — Mutation invalidating Coupons
+- [x] `Coupons` tag type added
+- [x] 6 hooks exported
+
+#### 7.10 Types & Styles ✅
+
+- [x] `Coupon` interface in client types
+- [x] `CouponValidationResult` interface in client types
+- [x] CSS: `.coupon-input`, `.coupon-input__applied`, `.coupon-management__form`, `.coupon-management__card`, `.coupon-management__code-badge`
+
+**Tests:** 20 new Zod validator tests (96 total server tests)
 
 ---
 
-### Phase 8: Discussion Forum (3-4 weeks)
+### Phase 8: Discussion Forum (3-4 weeks) ✅ COMPLETE
 
 **Goal:** Community engagement within courses
 
-#### 8.1 Backend - Discussion Models (Mongoose)
+#### 8.1 Backend - Discussion Models (Mongoose) ✅
 
-```typescript
-// server/src/models/discussionModel.ts
-import mongoose, { Schema, Document } from 'mongoose';
+- [x] `Discussion` model — discussionId, courseId, chapterId?, userId, userName, title, content, upvotes, replyCount, isInstructorPost, isPinned
+- [x] `Reply` model — replyId, discussionId, userId, userName, content, isInstructorReply, upvotes
+- [x] Compound indexes: `{courseId, isPinned, createdAt}`, `{courseId, chapterId}`, `{discussionId, createdAt}`
 
-export interface IDiscussion extends Document {
-  discussionId: string;
-  courseId: string;
-  chapterId?: string;
-  userId: string;
-  userName: string;
-  title: string;
-  content: string;
-  upvotes: number;
-  replyCount: number;
-  isInstructorPost: boolean;
-  isPinned: boolean;
-  createdAt: Date;
-}
+#### 8.2 Backend - Discussion Endpoints ✅
 
-const discussionSchema = new Schema(
-  {
-    discussionId: { type: String, required: true, unique: true },
-    courseId: { type: String, required: true, index: true },
-    chapterId: { type: String, index: true },
-    userId: { type: String, required: true },
-    userName: { type: String, required: true },
-    title: { type: String, required: true },
-    content: { type: String, required: true },
-    upvotes: { type: Number, default: 0 },
-    replyCount: { type: Number, default: 0 },
-    isInstructorPost: { type: Boolean, default: false },
-    isPinned: { type: Boolean, default: false },
-  },
-  { timestamps: true }
-);
+- [x] `GET /discussions/course/:courseId` — List discussions with search, sort, pagination, chapter filter
+- [x] `POST /discussions/course/:courseId` — Create discussion (auth required, auto-detect instructor post)
+- [x] `GET /discussions/:discussionId` — Get discussion with all replies
+- [x] `POST /discussions/:discussionId/replies` — Add reply (auto-detect instructor reply)
+- [x] `PUT /discussions/:discussionId/upvote` — Upvote discussion
+- [x] `PUT /discussions/:discussionId/pin` — Pin/unpin (instructor only, 403 for non-instructors)
+- [x] `PUT /discussions/replies/:replyId/upvote` — Upvote reply
+- [x] `DELETE /discussions/:discussionId` — Delete discussion + all replies (owner or instructor)
+- [x] `DELETE /discussions/replies/:replyId` — Delete reply + decrement replyCount (owner or instructor)
+- [x] 5 Zod schemas: `discussionIdParam`, `replyIdParam`, `getDiscussionsQuery`, `createDiscussionBody`, `createReplyBody`
+- [x] Full Zod validation on all routes via `validateRequest()` middleware
 
-// Compound indexes for efficient queries
-discussionSchema.index({ courseId: 1, isPinned: -1, createdAt: -1 });
-discussionSchema.index({ courseId: 1, chapterId: 1 });
+#### 8.3 Frontend - Discussion Components ✅
 
-export const Discussion = mongoose.model<IDiscussion>(
-  'Discussion',
-  discussionSchema
-);
-
-// Reply Model
-export interface IReply extends Document {
-  replyId: string;
-  discussionId: string;
-  userId: string;
-  userName: string;
-  content: string;
-  isInstructorReply: boolean;
-  upvotes: number;
-  createdAt: Date;
-}
-
-const replySchema = new Schema(
-  {
-    replyId: { type: String, required: true, unique: true },
-    discussionId: { type: String, required: true, index: true },
-    userId: { type: String, required: true },
-    userName: { type: String, required: true },
-    content: { type: String, required: true },
-    isInstructorReply: { type: Boolean, default: false },
-    upvotes: { type: Number, default: 0 },
-  },
-  { timestamps: true }
-);
-
-replySchema.index({ discussionId: 1, createdAt: 1 });
-
-export const Reply = mongoose.model<IReply>('Reply', replySchema);
-```
-
-#### 8.2 Backend - Discussion Endpoints
-
-- `GET /courses/:courseId/discussions` - List discussions
-- `POST /courses/:courseId/discussions` - Create discussion
-- `GET /discussions/:discussionId` - Get with replies
-- `POST /discussions/:discussionId/replies` - Add reply
-- `PUT /discussions/:discussionId/upvote` - Upvote
-- `PUT /discussions/:discussionId/pin` - Pin (instructor only)
-
-#### 8.3 Frontend - Discussion Components
-
-- Discussion list with filters
-- New discussion form
-- Discussion thread view
-- Reply composer
-- Upvote buttons
-- Instructor badge
-- Search within discussions
+- [x] Student course discussion list page with search, sort filters (newest/oldest/popular)
+- [x] New discussion form with title + content
+- [x] Discussion thread view with original post and all replies
+- [x] Reply composer
+- [x] Upvote buttons on discussions and replies
+- [x] Instructor badge (auto-detected: `isInstructorPost`, `isInstructorReply`)
+- [x] Pinned discussion badge
+- [x] Teacher discussion management page with course selector
+- [x] Teacher discussion thread page with full moderation controls
+- [x] 9 RTK Query endpoints: `getDiscussions`, `getDiscussion`, `createDiscussion`, `createReply`, `upvoteDiscussion`, `upvoteReply`, `pinDiscussion`, `deleteDiscussion`, `deleteReply`
+- [x] `Discussions` tag type for cache invalidation
+- [x] 4 TypeScript interfaces: `Discussion`, `DiscussionReply`, `DiscussionWithReplies`, `DiscussionsResponse`
+- [x] Discussions link in teacher sidebar (MessageSquare icon)
+- [x] Discussion-specific CSS styles (40+ classes in components.css)
+- [x] 19 new Zod validation tests (server total: 115)
 
 ---
 
@@ -1993,8 +1959,8 @@ app.use('/api/', apiLimiter);
 | **Phase 4** | **2 weeks**   | **Certificates** ✅ COMPLETE                           |
 | **Phase 5** | **3 weeks**   | **Analytics Dashboard** ✅ COMPLETE                    |
 | **Phase 6** | **2 weeks**   | **Email Notifications** ✅ COMPLETE                    |
-| Phase 7     | 2 weeks       | Coupon system                                          |
-| Phase 8     | 3-4 weeks     | Discussion forum                                       |
+| **Phase 7** | **2 weeks**   | **Coupon System** ✅ COMPLETE                          |
+| **Phase 8** | **3-4 weeks** | **Discussion Forum** ✅ COMPLETE                       |
 
 **Total: 21-27 weeks** (including migration + all phases)
 
@@ -2007,11 +1973,11 @@ app.use('/api/', apiLimiter);
 5. ~~**Phase 4** - Certificates (completion incentive)~~ ✅ COMPLETE
 6. ~~**Phase 5** - Analytics (insights)~~ ✅ COMPLETE
 7. ~~**Phase 6** - Emails (engagement)~~ ✅ COMPLETE
-8. **Phase 7** - Coupons (monetization)
-9. **Phase 8** - Forum (community)
+8. ~~**Phase 7** - Coupons (monetization)~~ ✅ COMPLETE
+9. ~~**Phase 8** - Forum (community)~~ ✅ COMPLETE
 
 ---
 
-_Document updated: Phase 0 through Phase 6 marked 100% complete._
-_Phase 6 additions: Resend email service, 5 HTML email templates, Notification model, 6 notification endpoints, email triggers on enrollment + completion, progress reminder cron endpoint, student + teacher notification pages, live unread badge, 5 RTK Query endpoints, 12 new Zod tests._
-_Version: 9.0 — March 2026_
+_Document updated: Phase 0 through Phase 8 marked 100% complete. ALL PHASES COMPLETE._
+_Phase 8 additions: Discussion + Reply Mongoose models with compound indexes, 9 discussion controller functions (CRUD + upvote + pin), 7 discussion routes with Zod validation, 5 Zod schemas, student discussion list page (search/sort/create), discussion thread page (replies/upvote/pin/delete), teacher discussion management page with course selector, teacher discussion thread with moderation controls, 9 RTK Query endpoints, 4 TypeScript interfaces, Discussions sidebar link, 40+ CSS classes, 19 new Zod tests._
+_Version: 11.0 — March 2026_

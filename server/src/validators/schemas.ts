@@ -91,6 +91,7 @@ export const createTransactionBody = z.object({
   transactionId: z.string().min(1, 'transactionId is required'),
   amount: z.number().optional(),
   paymentProvider: z.string().min(1, 'paymentProvider is required'),
+  couponCode: z.string().optional(),
 });
 
 export const stripePaymentIntentBody = z.object({
@@ -186,4 +187,88 @@ export const sendTestEmailBody = z.object({
 export const notificationsQuery = z.object({
   page: z.coerce.number().int().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(50).optional(),
+});
+
+// ─── Coupon Schemas ────────────────────────────────────────────────────────────
+
+export const createCouponBody = z.object({
+  code: z
+    .string()
+    .min(3, 'Coupon code must be at least 3 characters')
+    .max(20, 'Coupon code must be at most 20 characters')
+    .regex(
+      /^[A-Za-z0-9_-]+$/,
+      'Coupon code can only contain letters, numbers, hyphens, and underscores'
+    ),
+  discountType: z.enum(['percentage', 'fixed']),
+  discountValue: z.number().positive('Discount value must be positive'),
+  validFrom: z.string().min(1, 'validFrom is required'),
+  validUntil: z.string().min(1, 'validUntil is required'),
+  usageLimit: z.number().int().positive().optional(),
+  courseIds: z.array(z.string()).optional(),
+  minPurchase: z.number().int().min(0).optional(),
+  createdBy: z.string().min(1, 'createdBy is required'),
+});
+
+export const updateCouponBody = z
+  .object({
+    discountType: z.enum(['percentage', 'fixed']).optional(),
+    discountValue: z.number().positive().optional(),
+    validFrom: z.string().optional(),
+    validUntil: z.string().optional(),
+    usageLimit: z.number().int().positive().nullable().optional(),
+    courseIds: z.array(z.string()).optional(),
+    minPurchase: z.number().int().min(0).optional(),
+    isActive: z.boolean().optional(),
+  })
+  .passthrough();
+
+export const validateCouponParams = z.object({
+  code: z.string().min(1, 'Coupon code is required'),
+});
+
+export const validateCouponQuery = z.object({
+  courseId: z.string().optional(),
+  amount: z.coerce.number().int().min(0).optional(),
+});
+
+export const couponIdParam = z.object({
+  couponId: z.string().min(1, 'couponId is required'),
+});
+
+// ─── Discussion Schemas ────────────────────────────────────────────────────────
+
+export const discussionIdParam = z.object({
+  discussionId: z.string().min(1, 'discussionId is required'),
+});
+
+export const replyIdParam = z.object({
+  replyId: z.string().min(1, 'replyId is required'),
+});
+
+export const getDiscussionsQuery = z.object({
+  chapterId: z.string().optional(),
+  search: z.string().max(200).optional(),
+  sort: z.enum(['newest', 'oldest', 'popular']).optional(),
+  page: z.coerce.number().int().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(50).optional(),
+});
+
+export const createDiscussionBody = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be at most 200 characters'),
+  content: z
+    .string()
+    .min(1, 'Content is required')
+    .max(5000, 'Content must be at most 5000 characters'),
+  chapterId: z.string().optional(),
+});
+
+export const createReplyBody = z.object({
+  content: z
+    .string()
+    .min(1, 'Reply content is required')
+    .max(3000, 'Reply must be at most 3000 characters'),
 });

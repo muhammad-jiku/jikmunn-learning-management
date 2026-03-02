@@ -1,9 +1,31 @@
 import { formatPrice } from '@/lib/utils';
 import Image from 'next/image';
+import CouponInput from '../payment/CouponInput';
 import AccordionSections from '../shared/AccordionSections';
 
-const CoursePreview = ({ course }: CoursePreviewProps) => {
+interface CoursePreviewExtendedProps extends CoursePreviewProps {
+  showCouponInput?: boolean;
+  onCouponApplied?: (
+    result: {
+      couponCode: string;
+      discountAmount: number;
+      finalAmount: number;
+    } | null
+  ) => void;
+  appliedDiscount?: number;
+}
+
+const CoursePreview = ({
+  course,
+  showCouponInput,
+  onCouponApplied,
+  appliedDiscount,
+}: CoursePreviewExtendedProps) => {
   const price = formatPrice(course.price);
+  const finalPrice = appliedDiscount
+    ? formatPrice((course.price || 0) - appliedDiscount)
+    : price;
+
   return (
     <div className='course-preview'>
       <div className='course-preview__container'>
@@ -38,10 +60,39 @@ const CoursePreview = ({ course }: CoursePreviewProps) => {
           <span className='font-bold'>1x {course.title}</span>
           <span className='font-bold'>{price}</span>
         </div>
-        <div className='flex justify-between border-t border-customgreys-dirty-grey pt-4'>
-          <span className='font-bold text-lg'>Total Amount</span>
-          <span className='font-bold text-lg'>{price}</span>
-        </div>
+
+        {showCouponInput && onCouponApplied && (
+          <div className='mb-4'>
+            <CouponInput
+              courseId={course.courseId}
+              originalAmount={course.price || 0}
+              onCouponApplied={onCouponApplied}
+            />
+          </div>
+        )}
+
+        {appliedDiscount && appliedDiscount > 0 ? (
+          <>
+            <div className='flex justify-between mb-2 text-green-400 text-sm'>
+              <span>Coupon Discount</span>
+              <span>-{formatPrice(appliedDiscount)}</span>
+            </div>
+            <div className='flex justify-between border-t border-customgreys-dirty-grey pt-4'>
+              <span className='font-bold text-lg'>Total Amount</span>
+              <div className='text-right'>
+                <span className='font-bold text-lg'>{finalPrice}</span>
+                <span className='ml-2 text-sm text-customgreys-dirty-grey line-through'>
+                  {price}
+                </span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className='flex justify-between border-t border-customgreys-dirty-grey pt-4'>
+            <span className='font-bold text-lg'>Total Amount</span>
+            <span className='font-bold text-lg'>{price}</span>
+          </div>
+        )}
       </div>
     </div>
   );

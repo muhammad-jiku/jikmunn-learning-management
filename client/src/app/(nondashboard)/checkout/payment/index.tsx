@@ -14,7 +14,7 @@ import {
   useStripe,
 } from '@stripe/react-stripe-js';
 import { CreditCard } from 'lucide-react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 const PaymentPageContent = () => {
@@ -25,6 +25,25 @@ const PaymentPageContent = () => {
   const { course, courseId } = useCurrentCourse();
   const { user } = useUser();
   const { signOut } = useClerk();
+
+  const [couponData, setCouponData] = useState<{
+    couponCode: string;
+    discountAmount: number;
+    finalAmount: number;
+  } | null>(null);
+
+  const handleCouponApplied = useCallback(
+    (
+      result: {
+        couponCode: string;
+        discountAmount: number;
+        finalAmount: number;
+      } | null
+    ) => {
+      setCouponData(result);
+    },
+    []
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,10 +75,8 @@ const PaymentPageContent = () => {
     }
 
     const cleanBaseUrl = baseUrl.replace(/(https?:\/\/)+/, 'https://');
-    // console.log('clean base url:', cleanBaseUrl);
 
     const returnUrl = `${cleanBaseUrl}/checkout?step=3&id=${courseId}`;
-    // console.log('Using return URL:', returnUrl);
 
     try {
       const result = await stripe.confirmPayment({
@@ -70,24 +87,28 @@ const PaymentPageContent = () => {
         redirect: 'if_required',
       });
 
-      // console.log('Payment result:', result);
-
       if (result.error) {
         toast.error(`Payment failed: ${result.error.message}`);
         return;
       }
 
       if (result.paymentIntent?.status === 'succeeded') {
-        const transactionData = {
+        const finalAmount = couponData
+          ? couponData.finalAmount
+          : course.price || 0;
+
+        const transactionData: any = {
           transactionId: result.paymentIntent.id,
           userId: user.id,
           courseId: courseId,
           paymentProvider: 'stripe' as const,
-          amount: course.price || 0,
+          amount: finalAmount,
           dateTime: new Date().toISOString(),
         };
 
-        // console.log('Creating transaction with data:', transactionData);
+        if (couponData?.couponCode) {
+          transactionData.couponCode = couponData.couponCode;
+        }
 
         try {
           await createTransaction(transactionData).unwrap();
@@ -122,7 +143,12 @@ const PaymentPageContent = () => {
     <div className='payment'>
       <div className='payment__container'>
         <div className='payment__preview'>
-          <CoursePreview course={course} />
+          <CoursePreview
+            course={course}
+            showCouponInput
+            onCouponApplied={handleCouponApplied}
+            appliedDiscount={couponData?.discountAmount}
+          />
         </div>
 
         <div className='payment__form-container'>

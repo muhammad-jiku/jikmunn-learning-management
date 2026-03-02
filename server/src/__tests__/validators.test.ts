@@ -1,22 +1,34 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import {
   addCommentBody,
   addReviewBody,
   certificateIdParam,
   chapterParams,
+  couponIdParam,
   courseIdParam,
+  createCouponBody,
+  createDiscussionBody,
+  createReplyBody,
   createTransactionBody,
+  discussionIdParam,
   generateCertificateBody,
   getCourseReviewsQuery,
+  getDiscussionsQuery,
   notificationIdParam,
   notificationsQuery,
+  replyIdParam,
   sendTestEmailBody,
   submitQuizBody,
   teacherCourseParams,
   teacherIdParam,
+  updateCouponBody,
   updateCourseBody,
   updateReviewBody,
   updateUserBody,
   upsertQuizBody,
+  validateCouponParams,
+  validateCouponQuery,
 } from '../validators/schemas';
 
 describe('Server Zod Schemas', () => {
@@ -387,6 +399,291 @@ describe('Server Zod Schemas', () => {
 
     it('should reject page of 0', () => {
       expect(notificationsQuery.safeParse({ page: '0' }).success).toBe(false);
+    });
+  });
+
+  // ─── Coupon Schemas ──────────────────────────────────────────────────────────
+
+  describe('createCouponBody', () => {
+    const validCoupon = {
+      code: 'SUMMER2026',
+      discountType: 'percentage',
+      discountValue: 20,
+      validFrom: '2026-06-01T00:00:00Z',
+      validUntil: '2026-08-31T23:59:59Z',
+      createdBy: 'user_123',
+    };
+
+    it('should accept valid coupon', () => {
+      expect(createCouponBody.safeParse(validCoupon).success).toBe(true);
+    });
+
+    it('should accept valid coupon with optional fields', () => {
+      const result = createCouponBody.safeParse({
+        ...validCoupon,
+        usageLimit: 100,
+        courseIds: ['course1', 'course2'],
+        minPurchase: 999,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject empty code', () => {
+      expect(
+        createCouponBody.safeParse({ ...validCoupon, code: '' }).success
+      ).toBe(false);
+    });
+
+    it('should reject code with spaces', () => {
+      expect(
+        createCouponBody.safeParse({ ...validCoupon, code: 'INVALID CODE' })
+          .success
+      ).toBe(false);
+    });
+
+    it('should reject code shorter than 3 chars', () => {
+      expect(
+        createCouponBody.safeParse({ ...validCoupon, code: 'AB' }).success
+      ).toBe(false);
+    });
+
+    it('should reject invalid discountType', () => {
+      expect(
+        createCouponBody.safeParse({
+          ...validCoupon,
+          discountType: 'invalid',
+        }).success
+      ).toBe(false);
+    });
+
+    it('should reject negative discountValue', () => {
+      expect(
+        createCouponBody.safeParse({ ...validCoupon, discountValue: -5 })
+          .success
+      ).toBe(false);
+    });
+
+    it('should reject missing createdBy', () => {
+      const { createdBy, ...noCb } = validCoupon;
+      expect(createCouponBody.safeParse(noCb).success).toBe(false);
+    });
+
+    it('should accept fixed discountType', () => {
+      expect(
+        createCouponBody.safeParse({
+          ...validCoupon,
+          discountType: 'fixed',
+          discountValue: 500,
+        }).success
+      ).toBe(true);
+    });
+  });
+
+  describe('updateCouponBody', () => {
+    it('should accept partial update', () => {
+      expect(updateCouponBody.safeParse({ discountValue: 30 }).success).toBe(
+        true
+      );
+    });
+
+    it('should accept empty body', () => {
+      expect(updateCouponBody.safeParse({}).success).toBe(true);
+    });
+
+    it('should accept isActive toggle', () => {
+      expect(updateCouponBody.safeParse({ isActive: false }).success).toBe(
+        true
+      );
+    });
+
+    it('should reject invalid discountType', () => {
+      expect(
+        updateCouponBody.safeParse({ discountType: 'bogus' }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('validateCouponParams', () => {
+    it('should accept valid code', () => {
+      expect(validateCouponParams.safeParse({ code: 'SAVE20' }).success).toBe(
+        true
+      );
+    });
+
+    it('should reject empty code', () => {
+      expect(validateCouponParams.safeParse({ code: '' }).success).toBe(false);
+    });
+  });
+
+  describe('validateCouponQuery', () => {
+    it('should accept empty query', () => {
+      expect(validateCouponQuery.safeParse({}).success).toBe(true);
+    });
+
+    it('should accept courseId and amount', () => {
+      expect(
+        validateCouponQuery.safeParse({ courseId: 'c1', amount: '4999' })
+          .success
+      ).toBe(true);
+    });
+
+    it('should reject negative amount', () => {
+      expect(validateCouponQuery.safeParse({ amount: '-1' }).success).toBe(
+        false
+      );
+    });
+  });
+
+  describe('couponIdParam', () => {
+    it('should accept valid couponId', () => {
+      expect(couponIdParam.safeParse({ couponId: 'abc123' }).success).toBe(
+        true
+      );
+    });
+
+    it('should reject empty couponId', () => {
+      expect(couponIdParam.safeParse({ couponId: '' }).success).toBe(false);
+    });
+  });
+
+  // ─── Discussion Schemas ──────────────────────────────────────────────────────
+
+  describe('discussionIdParam', () => {
+    it('should accept valid discussionId', () => {
+      expect(
+        discussionIdParam.safeParse({ discussionId: 'disc-123' }).success
+      ).toBe(true);
+    });
+
+    it('should reject empty discussionId', () => {
+      expect(discussionIdParam.safeParse({ discussionId: '' }).success).toBe(
+        false
+      );
+    });
+  });
+
+  describe('replyIdParam', () => {
+    it('should accept valid replyId', () => {
+      expect(replyIdParam.safeParse({ replyId: 'rep-456' }).success).toBe(true);
+    });
+
+    it('should reject empty replyId', () => {
+      expect(replyIdParam.safeParse({ replyId: '' }).success).toBe(false);
+    });
+  });
+
+  describe('getDiscussionsQuery', () => {
+    it('should accept empty query', () => {
+      expect(getDiscussionsQuery.safeParse({}).success).toBe(true);
+    });
+
+    it('should accept all valid params', () => {
+      expect(
+        getDiscussionsQuery.safeParse({
+          chapterId: 'ch1',
+          search: 'hello',
+          sort: 'popular',
+          page: '2',
+          limit: '10',
+        }).success
+      ).toBe(true);
+    });
+
+    it('should reject invalid sort value', () => {
+      expect(getDiscussionsQuery.safeParse({ sort: 'invalid' }).success).toBe(
+        false
+      );
+    });
+
+    it('should reject page less than 1', () => {
+      expect(getDiscussionsQuery.safeParse({ page: '0' }).success).toBe(false);
+    });
+
+    it('should reject limit greater than 50', () => {
+      expect(getDiscussionsQuery.safeParse({ limit: '51' }).success).toBe(
+        false
+      );
+    });
+
+    it('should reject search longer than 200 chars', () => {
+      expect(
+        getDiscussionsQuery.safeParse({ search: 'a'.repeat(201) }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('createDiscussionBody', () => {
+    it('should accept valid discussion', () => {
+      expect(
+        createDiscussionBody.safeParse({
+          title: 'Question about module 3',
+          content: 'I am confused about...',
+        }).success
+      ).toBe(true);
+    });
+
+    it('should accept discussion with optional chapterId', () => {
+      expect(
+        createDiscussionBody.safeParse({
+          title: 'Chapter discussion',
+          content: 'Related to chapter...',
+          chapterId: 'ch-1',
+        }).success
+      ).toBe(true);
+    });
+
+    it('should reject empty title', () => {
+      expect(
+        createDiscussionBody.safeParse({
+          title: '',
+          content: 'some content',
+        }).success
+      ).toBe(false);
+    });
+
+    it('should reject empty content', () => {
+      expect(
+        createDiscussionBody.safeParse({
+          title: 'A title',
+          content: '',
+        }).success
+      ).toBe(false);
+    });
+
+    it('should reject title longer than 200 chars', () => {
+      expect(
+        createDiscussionBody.safeParse({
+          title: 'x'.repeat(201),
+          content: 'some content',
+        }).success
+      ).toBe(false);
+    });
+
+    it('should reject content longer than 5000 chars', () => {
+      expect(
+        createDiscussionBody.safeParse({
+          title: 'A title',
+          content: 'x'.repeat(5001),
+        }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('createReplyBody', () => {
+    it('should accept valid reply', () => {
+      expect(
+        createReplyBody.safeParse({ content: 'Great question!' }).success
+      ).toBe(true);
+    });
+
+    it('should reject empty content', () => {
+      expect(createReplyBody.safeParse({ content: '' }).success).toBe(false);
+    });
+
+    it('should reject content longer than 3000 chars', () => {
+      expect(
+        createReplyBody.safeParse({ content: 'y'.repeat(3001) }).success
+      ).toBe(false);
     });
   });
 });

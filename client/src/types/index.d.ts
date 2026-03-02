@@ -397,6 +397,83 @@ declare global {
   interface UnreadCountResponse {
     unreadCount: number;
   }
+
+  // ─── Coupons ──────────────────────────────────────────────────────────────────
+
+  interface Coupon {
+    _id: string;
+    code: string;
+    discountType: 'percentage' | 'fixed';
+    discountValue: number;
+    validFrom: string;
+    validUntil: string;
+    usageLimit?: number;
+    usedCount: number;
+    courseIds: string[];
+    minPurchase: number;
+    createdBy: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  interface CouponValidationResult {
+    valid: boolean;
+    reason?: string;
+    coupon?: {
+      code: string;
+      discountType: 'percentage' | 'fixed';
+      discountValue: number;
+      minPurchase: number;
+      courseIds: string[];
+      validUntil: string;
+    };
+    discountAmount?: number;
+    finalAmount?: number;
+    originalAmount?: number;
+    minPurchase?: number;
+  }
+
+  // ─── Discussions ──────────────────────────────────────────────────────────────
+
+  interface Discussion {
+    discussionId: string;
+    courseId: string;
+    chapterId?: string;
+    userId: string;
+    userName: string;
+    title: string;
+    content: string;
+    upvotes: number;
+    replyCount: number;
+    isInstructorPost: boolean;
+    isPinned: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  interface DiscussionReply {
+    replyId: string;
+    discussionId: string;
+    userId: string;
+    userName: string;
+    content: string;
+    isInstructorReply: boolean;
+    upvotes: number;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  interface DiscussionWithReplies extends Discussion {
+    replies: DiscussionReply[];
+  }
+
+  interface DiscussionsResponse {
+    data: Discussion[];
+    total: number;
+    page: number;
+    limit: number;
+  }
 }
 
 export {};

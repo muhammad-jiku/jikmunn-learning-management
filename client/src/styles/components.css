@@ -908,3 +908,273 @@
 .notification-badge {
   @apply absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-700 px-1 text-[10px] font-bold text-white;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   COUPON COMPONENTS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Coupon Input (Checkout) */
+.coupon-input {
+  @apply space-y-1;
+}
+
+.coupon-input__row {
+  @apply flex items-center gap-2;
+}
+
+.coupon-input__applied {
+  @apply flex items-center justify-between rounded-lg border border-green-500/30 bg-green-500/5 px-3 py-2;
+}
+
+/* Coupon Management (Teacher) */
+.coupon-management {
+  @apply space-y-0;
+}
+
+.coupon-management__form {
+  @apply mt-4 rounded-lg border border-customgreys-dirty-grey/30 bg-customgreys-secondarybg p-5;
+}
+
+.coupon-management__card {
+  @apply rounded-lg border border-customgreys-dirty-grey/20 bg-customgreys-secondarybg p-4 transition-colors hover:border-customgreys-dirty-grey/40;
+}
+
+.coupon-management__code-badge {
+  @apply flex items-center rounded bg-primary-700/20 px-2.5 py-1 text-primary-500;
+}
+
+/* ─── Discussion Forum ──────────────────────────────────────────────────────── */
+
+.discussion-page {
+  @apply space-y-6 px-8 py-5;
+}
+
+.discussion-error {
+  @apply flex items-center justify-center py-20 text-red-400;
+}
+
+.discussion-empty {
+  @apply flex flex-col items-center justify-center rounded-lg border border-dashed border-customgreys-dirty-grey/30 py-16 text-center text-gray-400;
+}
+
+.discussion-create-btn {
+  @apply bg-primary-700 text-white hover:bg-primary-600;
+}
+
+.discussion-back-btn {
+  @apply flex items-center text-sm text-customgreys-dirty-grey hover:text-white transition-colors;
+}
+
+/* Discussion Form */
+
+.discussion-form {
+  @apply space-y-3 rounded-lg border border-customgreys-dirty-grey/30 bg-customgreys-secondarybg p-5;
+}
+
+.discussion-form__title {
+  @apply bg-customgreys-primarybg border-customgreys-dirty-grey/30 text-white;
+}
+
+.discussion-form__content {
+  @apply w-full resize-none rounded-md border border-customgreys-dirty-grey/30 bg-customgreys-primarybg p-3 text-white placeholder:text-gray-500 focus:border-primary-700 focus:outline-none;
+}
+
+.discussion-form__submit {
+  @apply bg-primary-700 text-white hover:bg-primary-600;
+}
+
+/* Discussion Filters */
+
+.discussion-filters {
+  @apply flex flex-wrap items-center gap-4;
+}
+
+.discussion-filters__search {
+  @apply flex items-center gap-2 rounded-md border border-customgreys-dirty-grey/30 bg-customgreys-secondarybg px-3 py-1 text-gray-400;
+}
+
+.discussion-filters__input {
+  @apply border-none bg-transparent text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0;
+}
+
+.discussion-filters__sort {
+  @apply flex gap-1;
+}
+
+.discussion-filters__sort-btn {
+  @apply rounded-md px-3 py-1.5 text-sm text-gray-400 transition-colors hover:bg-customgreys-secondarybg hover:text-white;
+}
+
+.discussion-filters__sort-btn.active {
+  @apply bg-primary-700/20 text-primary-500;
+}
+
+/* Teacher Filters */
+
+.discussion-teacher-filters {
+  @apply flex flex-wrap items-center gap-4;
+}
+
+.discussion-teacher-filters__course-select {
+  @apply w-64 border-customgreys-dirty-grey/30 bg-customgreys-secondarybg text-white;
+}
+
+.discussion-teacher-stats {
+  @apply flex gap-6 text-sm text-gray-400;
+}
+
+.discussion-teacher-stats__item {
+  @apply flex items-center gap-2;
+}
+
+/* Discussion Card */
+
+.discussion-list {
+  @apply space-y-3;
+}
+
+.discussion-card {
+  @apply flex gap-4 rounded-lg border border-customgreys-dirty-grey/20 bg-customgreys-secondarybg p-4 transition-colors hover:border-customgreys-dirty-grey/40;
+}
+
+.discussion-card__left {
+  @apply flex flex-col items-center;
+}
+
+.discussion-card__upvote {
+  @apply flex flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-sm text-gray-400 transition-colors hover:bg-primary-700/20 hover:text-primary-500;
+}
+
+.discussion-card__body {
+  @apply flex-1 min-w-0;
+}
+
+.discussion-card__header {
+  @apply mb-1 flex flex-wrap gap-2;
+}
+
+.discussion-card__badge {
+  @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+}
+
+.discussion-card__badge--pinned {
+  @apply bg-yellow-500/20 text-yellow-400;
+}
+
+.discussion-card__badge--instructor {
+  @apply bg-primary-700/20 text-primary-500;
+}
+
+.discussion-card__title {
+  @apply text-base font-semibold text-white;
+}
+
+.discussion-card__preview {
+  @apply mt-1 text-sm text-gray-400 line-clamp-2;
+}
+
+.discussion-card__meta {
+  @apply mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500;
+}
+
+.discussion-card__actions {
+  @apply flex flex-col gap-1;
+}
+
+.discussion-card__action-btn {
+  @apply rounded p-1.5 text-gray-500 transition-colors hover:bg-customgreys-primarybg hover:text-gray-300;
+}
+
+.discussion-card__action-btn--danger {
+  @apply hover:text-red-400;
+}
+
+/* Discussion Thread */
+
+.discussion-thread {
+  @apply space-y-6 px-8 py-5;
+}
+
+.discussion-thread__post {
+  @apply rounded-lg border border-customgreys-dirty-grey/20 bg-customgreys-secondarybg p-6;
+}
+
+.discussion-thread__post-header {
+  @apply mb-3 flex items-start justify-between;
+}
+
+.discussion-thread__post-badges {
+  @apply flex flex-wrap gap-2;
+}
+
+.discussion-thread__post-actions {
+  @apply flex gap-1;
+}
+
+.discussion-thread__title {
+  @apply text-xl font-bold text-white;
+}
+
+.discussion-thread__meta {
+  @apply mt-1 flex items-center gap-2 text-sm text-gray-400;
+}
+
+.discussion-thread__content {
+  @apply mt-4 whitespace-pre-wrap text-gray-300 leading-relaxed;
+}
+
+.discussion-thread__post-footer {
+  @apply mt-4 flex items-center gap-4 border-t border-customgreys-dirty-grey/20 pt-3;
+}
+
+.discussion-thread__upvote-btn {
+  @apply flex items-center gap-1 rounded-md px-2 py-1 text-sm text-gray-400 transition-colors hover:bg-primary-700/20 hover:text-primary-500;
+}
+
+.discussion-thread__reply-count {
+  @apply flex items-center gap-1 text-sm text-gray-400;
+}
+
+/* Reply Composer */
+
+.discussion-reply-composer {
+  @apply space-y-3 rounded-lg border border-customgreys-dirty-grey/20 bg-customgreys-secondarybg p-4;
+}
+
+.discussion-reply-composer__input {
+  @apply w-full resize-none rounded-md border border-customgreys-dirty-grey/30 bg-customgreys-primarybg p-3 text-white placeholder:text-gray-500 focus:border-primary-700 focus:outline-none;
+}
+
+.discussion-reply-composer__submit {
+  @apply bg-primary-700 text-white hover:bg-primary-600;
+}
+
+/* Replies */
+
+.discussion-replies {
+  @apply space-y-3;
+}
+
+.discussion-reply {
+  @apply rounded-lg border border-customgreys-dirty-grey/15 bg-customgreys-secondarybg p-4;
+}
+
+.discussion-reply__header {
+  @apply flex items-center justify-between;
+}
+
+.discussion-reply__author {
+  @apply flex items-center gap-2;
+}
+
+.discussion-reply__actions {
+  @apply flex items-center gap-2;
+}
+
+.discussion-reply__content {
+  @apply mt-2 whitespace-pre-wrap text-sm text-gray-300 leading-relaxed;
+}
+
+.discussion-reply__footer {
+  @apply mt-2;
+}

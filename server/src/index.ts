@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import dotenv from 'dotenv';
+
+/* CONFIGURATIONS */
+dotenv.config();
+
 import {
   clerkMiddleware,
   createClerkClient,
@@ -7,9 +12,7 @@ import {
 } from '@clerk/express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import express from 'express';
-import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -17,15 +20,14 @@ import { connectDB } from './config/database';
 import logger from './config/logger';
 import analyticsRoutes from './routes/analyticsRoutes';
 import certificateRoutes from './routes/certificateRoutes';
+import couponRoutes from './routes/couponRoutes';
 import courseRoutes from './routes/courseRoutes';
+import discussionRoutes from './routes/discussionRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import userClerkRoutes from './routes/userClerkRoutes';
 import userCourseProgressRoutes from './routes/userCourseProgressRoutes';
-
-/* CONFIGURATIONS */
-dotenv.config();
 
 // Connect to MongoDB
 connectDB();
@@ -97,8 +99,28 @@ const authLimiter = rateLimit({
 
 app.use(apiLimiter);
 
-// NoSQL injection sanitization
-app.use(mongoSanitize());
+// NoSQL injection sanitization (Express 5 compatible — req.query is read-only)
+app.use((req, _res, next) => {
+  const sanitize = (obj: unknown): unknown => {
+    if (obj === null || obj === undefined) return obj;
+    if (typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(sanitize);
+    const clean: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      if (key.startsWith('$')) continue;
+      clean[key] = sanitize(value);
+    }
+    return clean;
+  };
+  if (req.body) req.body = sanitize(req.body);
+  if (req.params) {
+    const sanitized = sanitize(req.params) as Record<string, string>;
+    for (const key of Object.keys(req.params)) {
+      req.params[key] = sanitized[key] ?? req.params[key];
+    }
+  }
+  next();
+});
 
 app.use(
   morgan('combined', {
@@ -132,6 +154,8 @@ app.use('/courses', courseRoutes);
 app.use('/reviews', reviewRoutes);
 app.use('/certificates', certificateRoutes);
 app.use('/analytics', requireAuth(), analyticsRoutes);
+app.use('/coupons', couponRoutes);
+app.use('/discussions', discussionRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/users/clerk', authLimiter, requireAuth(), userClerkRoutes);
 app.use('/transactions', authLimiter, requireAuth(), transactionRoutes);
